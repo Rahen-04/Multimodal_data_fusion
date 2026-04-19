@@ -29,7 +29,7 @@ def save_image(pil_img, prefix):
     pil_img.save(path)
     return path
 
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "55f7375af350d11fbc81cd34dd7b7679")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
 # Load ML models once at startup (silently skipped if not trained yet)
 _ml_models = load_models()
