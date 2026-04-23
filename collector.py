@@ -39,22 +39,19 @@ INTERVAL = 600   # 10 minutes
 
 def collect_data():
     print(f"\n[Collector] Running at {datetime.now()}")
-
     for city in CITIES:
         try:
             print(f"[Collector] Fetching → {city}")
-
-            response = requests.get(f"{API_BASE}/analyze/{city}", timeout=120)
+            response = requests.get(f"{API_BASE}/analyze/{city}", timeout=60)
             data = response.json()
-
             if "error" in data:
                 print(f"[Error] {city}: {data['error']}")
             else:
                 print(f"[OK] {city} data stored")
-
+        except requests.exceptions.Timeout:
+            print(f"[Timeout] {city}: skipping after 60s")
         except Exception as e:
             print(f"[Exception] {city}: {str(e)}")
-
 
 if __name__ == "__main__":
     print(" Continuous Data Collector Started")

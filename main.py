@@ -9,8 +9,6 @@ import feedparser
 import os
 import re
 from datetime import datetime, timedelta
-from sklearn.preprocessing import StandardScaler
-
 from database import init_db, save_analysis, get_history
 from features  import (
     pixel_cloud_score, pixel_heat_score,
@@ -18,6 +16,7 @@ from features  import (
     build_feature_vector,
 )
 from train_model import load_models, predict_with_models
+from database import get_connection, save_labels
 
 app = FastAPI()
 
@@ -31,6 +30,12 @@ def save_image(pil_img, prefix):
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
+if not WEATHER_API_KEY:
+    raise ValueError("Missing WEATHER_API_KEY in environment variables")
+
+# Initialise DB tables
+init_db()
+
 # Load ML models once at startup (silently skipped if not trained yet)
 _ml_models = load_models()
 if _ml_models:
@@ -38,8 +43,7 @@ if _ml_models:
 else:
     print("[API] No trained models found — using rule-based fallback")
 
-# Initialise DB tables
-init_db()
+
 
 
 # ── Unchanged helpers ─────────────────────────────────────────────────────────
@@ -71,7 +75,7 @@ def get_news(city):
            f"?q={city}+weather&hl=en-IN&gl=IN&ceid=IN:en")
     feed = feedparser.parse(url)
     articles = []
-    for entry in feed.entries[:5]:
+    for entry in feed.entries[:5] if feed.entries else []:
         articles.append({
             "title": entry.title,
             "image": entry.media_content[0]["url"] if "media_content" in entry else None,
@@ -135,7 +139,7 @@ def image_analysis(lat,lon, weather_data):
     temp  = weather_data["main"]["temp"]
 
     if temp > 30:
-        heat = max(heat, 0.4)
+        heat = heat+0.1
     if "storm" in weather_data["weather"][0]["description"].lower():
         cloud = max(cloud, 0.5)
 
@@ -217,7 +221,8 @@ def text_analysis(articles, city, img_res):
                 # Only suppress rain signal if image actually loaded AND shows clear sky
                 if event == "rain" and img_res.get("cloud_image") is not None and cloud < 0.4:
                     continue
-
+                result[event] += 1
+                
     for k in result:
         result[k] /= total
     return result
@@ -364,10 +369,21 @@ def analyze(city: str):
         # Merge ML + fallback
         analysis = {}
         for event in ["rain", "heat", "wind", "snow", "haze"]:
-            if event in ml_analysis:
-                analysis[event] = ml_analysis[event]
-            else:
-                analysis[event] = rule_analysis[event]
+            analysis = {}
+            for event in ["rain", "heat", "wind", "snow", "haze"]:
+                if event in ml_analysis:
+                    ml = ml_analysis[event]
+                    rule = rule_analysis[event]
+
+                    # combine both
+                    conf = 0.7 * ml["confidence"] + 0.3 * rule["confidence"]
+
+                    analysis[event] = {
+                        "detected": ml["detected"] or rule["detected"],
+                        "confidence": round(conf, 2)
+                    }
+                else:
+                    analysis[event] = rule_analysis[event]
     else:
         analysis = rule_analysis
     
@@ -388,32 +404,9 @@ def analyze(city: str):
     labels = auto_generate_labels(weather_data, text_res, img_res, forecast_data)
 
     # Save labels automatically
+
     try:
-        from database import get_connection
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT INTO labeled_events
-            (record_id, city, timestamp,
-            label_rain, label_heat, label_wind, label_snow, label_haze)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            record_id,
-            city,
-            datetime.utcnow(),
-            labels["rain"],
-            labels["heat"],
-            labels["wind"],
-            labels["snow"],
-            labels["haze"]
-        ))
-
-        conn.commit() 
-
-        cursor.close()
-        conn.close()
-
+        save_labels(record_id, city, datetime.utcnow(), labels)
     except Exception as e:
         print("[AutoLabel Error]", e)
 
@@ -457,21 +450,21 @@ from typing import List
 
 @app.get("/compare")
 def compare(cities: List[str] = Query(...)):
-    """
-    Compare multiple cities at once.
-    """
     results = {}
-    for city in cities[:5]:   # cap at 5 to avoid timeout
-        data = analyze(city)
-        if "error" not in data:
-            results[city] = {
-                "temperature": data["temperature"],
-                "weather":     data["weather"],
-                "analysis":    {
-                    k: {"detected": v["detected"], "confidence": v["confidence"]}
-                    for k, v in data["analysis"].items()
+    for city in cities[:5]:
+        try:
+            data = analyze(city)
+            if "error" not in data:
+                results[city] = {
+                    "temperature": data["temperature"],
+                    "weather":     data["weather"],
+                    "analysis":    {
+                        k: {"detected": v["detected"], "confidence": v["confidence"]}
+                        for k, v in data["analysis"].items()
+                    }
                 }
-            }
-        else:
-            results[city] = {"error": data["error"]}
+            else:
+                results[city] = {"error": data["error"]}
+        except Exception as e:
+            results[city] = {"error": str(e)}
     return results

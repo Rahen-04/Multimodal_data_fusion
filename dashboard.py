@@ -384,8 +384,9 @@ if page == "Live Analysis":
 # PAGE: History & Trends
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "History & Trends":
-    st.title("📊 Multi-City Trends")
+    st.title("📊 History & Trends")
 
+    # ── Load raw records for all selected cities ───────────────────────────
     all_data = []
     for c in cities:
         records = fetch_history(c)
@@ -396,59 +397,328 @@ elif page == "History & Trends":
             all_data.append(df)
 
     if not all_data:
-        st.info("No data available")
+        st.info("No historical data found for the selected cities. Run an analysis first.")
         st.stop()
 
-    df_all = pd.concat(all_data).sort_values("timestamp")
+    df_all = pd.concat(all_data).sort_values("timestamp").reset_index(drop=True)
 
-    st.subheader("🌡 Temperature Comparison")
-    pivot_temp = df_all.pivot_table(
-        index="timestamp", columns="city", values="temperature", aggfunc="mean"
-    )
-    st.line_chart(pivot_temp, use_container_width=True)
+    # ── Parse JSON columns into structured fields ──────────────────────────
+    def safe_json(val):
+        if val is None:
+            return {}
+        if isinstance(val, dict):
+            return val
+        try:
+            return json.loads(val)
+        except Exception:
+            return {}
 
-    st.subheader("☁️ Cloud Score Comparison")
-    pivot_cloud = df_all.pivot_table(
-        index="timestamp", columns="city", values="cloud_score", aggfunc="mean"
-    )
-    st.line_chart(pivot_cloud, use_container_width=True)
+    df_all["analysis_parsed"]   = df_all["analysis"].apply(safe_json)
+    df_all["raw_weather_parsed"] = df_all["raw_weather"].apply(safe_json)
+    df_all["text_raw_parsed"]   = df_all["text_raw"].apply(safe_json)
 
-    st.subheader("🔥 Heat Score Comparison")
-    pivot_heat = df_all.pivot_table(
-        index="timestamp", columns="city", values="heat_score", aggfunc="mean"
-    )
-    st.line_chart(pivot_heat, use_container_width=True)
+    # Flatten analysis confidence scores into individual columns
+    for event in ["rain", "heat", "wind", "snow", "haze"]:
+        df_all[f"conf_{event}"] = df_all["analysis_parsed"].apply(
+            lambda a: a.get(event, {}).get("confidence", 0) if isinstance(a, dict) else 0
+        )
+        df_all[f"det_{event}"] = df_all["analysis_parsed"].apply(
+            lambda a: bool(a.get(event, {}).get("detected", False)) if isinstance(a, dict) else False
+        )
 
-    st.subheader("🌧 Text Rain Signal Over Time")
-    pivot_text = df_all.pivot_table(
-        index="timestamp", columns="city", values="text_rain", aggfunc="mean"
+    # Flatten raw_weather fields
+    df_all["humidity"]   = df_all["raw_weather_parsed"].apply(lambda w: w.get("main", {}).get("humidity"))
+    df_all["pressure"]   = df_all["raw_weather_parsed"].apply(lambda w: w.get("main", {}).get("pressure"))
+    df_all["wind_speed"] = df_all["raw_weather_parsed"].apply(lambda w: w.get("wind", {}).get("speed"))
+    df_all["weather_id"] = df_all["raw_weather_parsed"].apply(
+        lambda w: w.get("weather", [{}])[0].get("id") if w.get("weather") else None
     )
-    st.line_chart(pivot_text, use_container_width=True)
+
+    # ── Filters (sidebar-style in a horizontal bar) ────────────────────────
+    st.markdown("### 🔍 Filters")
+    f1, f2, f3, f4 = st.columns([2, 2, 2, 2])
+
+    with f1:
+        city_filter = st.multiselect(
+            "City", options=sorted(df_all["city"].unique()), default=sorted(df_all["city"].unique())
+        )
+    with f2:
+        min_date = df_all["timestamp"].min().date()
+        max_date = df_all["timestamp"].max().date()
+        date_range = st.date_input(
+            "Date range",
+            value=(min_date, max_date),
+            min_value=min_date,
+            max_value=max_date,
+        )
+    with f3:
+        event_filter = st.multiselect(
+            "Event detected",
+            options=["rain", "heat", "wind", "snow", "haze"],
+            default=[],
+            help="Show only records where these events were detected",
+        )
+    with f4:
+        min_conf = st.slider("Min confidence (any event)", 0.0, 1.0, 0.0, 0.05)
+
+    # Apply filters
+    df_filtered = df_all[df_all["city"].isin(city_filter)].copy()
+
+    if len(date_range) == 2:
+        start_dt = pd.Timestamp(date_range[0])
+        end_dt   = pd.Timestamp(date_range[1]) + pd.Timedelta(days=1)
+        df_filtered = df_filtered[
+            (df_filtered["timestamp"] >= start_dt) &
+            (df_filtered["timestamp"] <  end_dt)
+        ]
+
+    if event_filter:
+        mask = pd.Series([False] * len(df_filtered), index=df_filtered.index)
+        for ev in event_filter:
+            mask = mask | df_filtered[f"det_{ev}"]
+        df_filtered = df_filtered[mask]
+
+    if min_conf > 0:
+        conf_cols = [f"conf_{e}" for e in ["rain", "heat", "wind", "snow", "haze"]]
+        max_conf_per_row = df_filtered[conf_cols].max(axis=1)
+        df_filtered = df_filtered[max_conf_per_row >= min_conf]
+
+    st.caption(f"Showing **{len(df_filtered)}** records after filters (total: {len(df_all)})")
+    st.divider()
+
+    if df_filtered.empty:
+        st.warning("No records match the current filters.")
+        st.stop()
+
+    # ══════════════════════════════════════════════════════════════════════
+    # SECTION 1 — Trend Charts
+    # ══════════════════════════════════════════════════════════════════════
+    st.markdown("## 📈 Trend Charts")
+
+    tab_temp, tab_scores, tab_conf, tab_signals = st.tabs([
+        "🌡 Temperature", "☁️ Image Scores", "📊 Event Confidence", "📰 Text Signals"
+    ])
+
+    with tab_temp:
+        pivot_temp = df_filtered.pivot_table(
+            index="timestamp", columns="city", values="temperature", aggfunc="mean"
+        )
+        st.line_chart(pivot_temp, use_container_width=True)
+
+        # Also show humidity & pressure if available
+        if df_filtered["humidity"].notna().any():
+            c1, c2 = st.columns(2)
+            with c1:
+                st.caption("Humidity (%)")
+                pivot_hum = df_filtered.pivot_table(
+                    index="timestamp", columns="city", values="humidity", aggfunc="mean"
+                )
+                st.line_chart(pivot_hum, use_container_width=True)
+            with c2:
+                st.caption("Wind Speed (m/s)")
+                pivot_wind = df_filtered.pivot_table(
+                    index="timestamp", columns="city", values="wind_speed", aggfunc="mean"
+                )
+                st.line_chart(pivot_wind, use_container_width=True)
+
+    with tab_scores:
+        c1, c2 = st.columns(2)
+        with c1:
+            st.caption("Cloud Score (satellite)")
+            pivot_cloud = df_filtered.pivot_table(
+                index="timestamp", columns="city", values="cloud_score", aggfunc="mean"
+            )
+            st.line_chart(pivot_cloud, use_container_width=True)
+        with c2:
+            st.caption("Heat Score (thermal)")
+            pivot_heat = df_filtered.pivot_table(
+                index="timestamp", columns="city", values="heat_score", aggfunc="mean"
+            )
+            st.line_chart(pivot_heat, use_container_width=True)
+
+    with tab_conf:
+        for event, icon in [("rain","🌧"), ("heat","🔥"), ("wind","💨"), ("snow","❄️"), ("haze","🌫")]:
+            if f"conf_{event}" in df_filtered.columns:
+                st.caption(f"{icon} {event.upper()} confidence over time")
+                pivot_ev = df_filtered.pivot_table(
+                    index="timestamp", columns="city", values=f"conf_{event}", aggfunc="mean"
+                )
+                st.line_chart(pivot_ev, use_container_width=True)
+
+    with tab_signals:
+        text_cols = {"text_rain": "🌧 Rain", "text_heat": "🔥 Heat",
+                     "text_wind": "💨 Wind", "text_snow": "❄️ Snow", "text_haze": "🌫 Haze"}
+        available = [c for c in text_cols if c in df_filtered.columns]
+        if available:
+            for col in available:
+                pivot_txt = df_filtered.pivot_table(
+                    index="timestamp", columns="city", values=col, aggfunc="mean"
+                )
+                st.caption(text_cols[col] + " text signal")
+                st.line_chart(pivot_txt, use_container_width=True)
+        else:
+            st.info("No text signal columns available.")
 
     st.divider()
-    st.subheader("Raw records")
-    st.dataframe(
-        df_all[["timestamp", "city", "temperature",
-                "cloud_score", "heat_score", "description"]].tail(20),
-        use_container_width=True,
+
+    # ══════════════════════════════════════════════════════════════════════
+    # SECTION 2 — Structured Records Table
+    # ══════════════════════════════════════════════════════════════════════
+    st.markdown("## 🗂 Structured Records")
+
+    # Build a clean display dataframe
+    display_cols = {
+        "id":          "ID",
+        "city":        "City",
+        "timestamp":   "Timestamp",
+        "temperature": "Temp °C",
+        "description": "Condition",
+        "humidity":    "Humidity %",
+        "wind_speed":  "Wind m/s",
+        "cloud_score": "Cloud Score",
+        "heat_score":  "Heat Score",
+        "conf_rain":   "Rain Conf",
+        "conf_heat":   "Heat Conf",
+        "conf_wind":   "Wind Conf",
+        "conf_snow":   "Snow Conf",
+        "conf_haze":   "Haze Conf",
+        "det_rain":    "Rain 🌧",
+        "det_heat":    "Heat 🔥",
+        "det_wind":    "Wind 💨",
+        "det_snow":    "Snow ❄️",
+        "det_haze":    "Haze 🌫",
+    }
+    avail = {k: v for k, v in display_cols.items() if k in df_filtered.columns}
+    df_display = (
+        df_filtered[list(avail.keys())]
+        .rename(columns=avail)
+        .sort_values("Timestamp", ascending=False)
+        .reset_index(drop=True)
     )
 
-    latest       = df_all.sort_values("timestamp").tail(1)
-    cloud_path   = latest["cloud_img_path"].values[0]
-    thermal_path = latest["thermal_img_path"].values[0]
+    # Format confidence columns as percentages
+    for col in ["Rain Conf", "Heat Conf", "Wind Conf", "Snow Conf", "Haze Conf"]:
+        if col in df_display.columns:
+            df_display[col] = df_display[col].apply(lambda x: f"{x:.0%}")
 
-    st.subheader("🛰 Latest Stored Images")
-    col1, col2 = st.columns(2)
-    with col1:
-        if cloud_path and os.path.exists(str(cloud_path)):
-            st.image(cloud_path, caption="Cloud Image")
-        else:
-            st.info("Cloud image not available on this machine")
-    with col2:
-        if thermal_path and os.path.exists(str(thermal_path)):
-            st.image(thermal_path, caption="Thermal Image")
-        else:
-            st.info("Thermal image not available on this machine")
+    # Format boolean detection columns
+    for col in ["Rain 🌧", "Heat 🔥", "Wind 💨", "Snow ❄️", "Haze 🌫"]:
+        if col in df_display.columns:
+            df_display[col] = df_display[col].apply(lambda x: "🔴" if x else "🟢")
+
+    st.dataframe(df_display, use_container_width=True, height=320)
+
+    st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════
+    # SECTION 3 — Per-Record Detail Cards (expandable)
+    # ══════════════════════════════════════════════════════════════════════
+    st.markdown("## 🔎 Record Detail Explorer")
+    st.caption("Click any record to inspect all parsed fields — weather, image scores, event analysis, news headlines.")
+
+    records_to_show = df_filtered.sort_values("timestamp", ascending=False).head(50)
+
+    EVENT_ICONS = {"rain": "🌧", "heat": "🔥", "wind": "💨", "snow": "❄️", "haze": "🌫"}
+
+    for _, row in records_to_show.iterrows():
+        # Build expander label
+        det_tags = " ".join(
+            EVENT_ICONS[e] for e in ["rain", "heat", "wind", "snow", "haze"]
+            if row.get(f"det_{e}", False)
+        ) or "✅ Clear"
+
+        label = (
+            f"#{int(row['id'])}  |  {row['city']}  |  "
+            f"{row['timestamp'].strftime('%Y-%m-%d %H:%M')}  |  "
+            f"{row.get('temperature', '--')}°C — {row.get('description', '').title()}  |  {det_tags}"
+        )
+
+        with st.expander(label, expanded=False):
+            col_w, col_i, col_a, col_n = st.columns([1.2, 1, 1.4, 1.4])
+
+            # ── Weather ──────────────────────────────────────────────────
+            with col_w:
+                st.markdown("**🌤 Weather**")
+                st.markdown(f"- **Temp:** {row.get('temperature', '--')} °C")
+                st.markdown(f"- **Condition:** {str(row.get('description', '--')).title()}")
+                rw = row["raw_weather_parsed"]
+                main = rw.get("main", {})
+                wind = rw.get("wind", {})
+                clouds = rw.get("clouds", {})
+                st.markdown(f"- **Humidity:** {main.get('humidity', '--')} %")
+                st.markdown(f"- **Pressure:** {main.get('pressure', '--')} hPa")
+                st.markdown(f"- **Wind:** {wind.get('speed', '--')} m/s")
+                st.markdown(f"- **Clouds:** {clouds.get('all', '--')} %")
+                st.markdown(f"- **Lat/Lon:** {row.get('lat', '--')}, {row.get('lon', '--')}")
+
+            # ── Image scores ─────────────────────────────────────────────
+            with col_i:
+                st.markdown("**🛰 Image Scores**")
+                st.markdown(f"- **Cloud score:** `{row.get('cloud_score', 0):.3f}`")
+                st.markdown(f"- **Heat score:** `{row.get('heat_score', 0):.3f}`")
+                st.markdown("**📰 Text Signals**")
+                for sig, label_txt in [
+                    ("text_rain", "Rain"), ("text_heat", "Heat"),
+                    ("text_wind", "Wind"), ("text_snow", "Snow"), ("text_haze", "Haze")
+                ]:
+                    val = row.get(sig, 0) or 0
+                    st.markdown(f"- **{label_txt}:** `{val:.2f}`")
+
+            # ── Event analysis ────────────────────────────────────────────
+            with col_a:
+                st.markdown("**📡 Event Analysis**")
+                analysis = row["analysis_parsed"]
+                if analysis:
+                    for event, icon in EVENT_ICONS.items():
+                        ev = analysis.get(event, {})
+                        detected = ev.get("detected", False)
+                        conf     = ev.get("confidence", 0)
+                        badge    = "🔴" if detected else "🟢"
+                        bar_pct  = int(conf * 100)
+                        st.markdown(
+                            f"{badge} **{icon} {event.upper()}** — `{conf:.0%}` conf  "
+                            f"<div style='background:#2a2d3e;border-radius:3px;height:5px;margin:2px 0 6px'>"
+                            f"<div style='width:{bar_pct}%;background:linear-gradient(90deg,#4cc9f0,#7209b7);height:5px;border-radius:3px'></div>"
+                            f"</div>",
+                            unsafe_allow_html=True
+                        )
+                        sources = ev.get("sources", {})
+                        if sources:
+                            src_str = ", ".join(k for k, v in sources.items() if v)
+                            if src_str:
+                                st.caption(f"   Sources: {src_str}")
+                else:
+                    st.info("No analysis data")
+
+            # ── News headlines ────────────────────────────────────────────
+            with col_n:
+                st.markdown("**📰 News Headlines**")
+                titles = row.get("text_raw_parsed")
+                if isinstance(titles, list) and titles:
+                    for t in titles[:5]:
+                        st.markdown(f"- {t}")
+                elif isinstance(titles, dict):
+                    for k, v in list(titles.items())[:5]:
+                        st.markdown(f"- {v if isinstance(v, str) else k}")
+                else:
+                    st.caption("No headlines stored")
+
+            # ── Satellite image URLs ──────────────────────────────────────
+            cloud_path   = row.get("cloud_img_path")
+            thermal_path = row.get("thermal_img_path")
+            if cloud_path or thermal_path:
+                st.markdown("**🛰 Stored Satellite Images**")
+                ic1, ic2 = st.columns(2)
+                with ic1:
+                    if cloud_path and os.path.exists(str(cloud_path)):
+                        st.image(cloud_path, caption="Cloud (VIIRS)", use_container_width=True)
+                    else:
+                        st.caption("Cloud image not on this machine")
+                with ic2:
+                    if thermal_path and os.path.exists(str(thermal_path)):
+                        st.image(thermal_path, caption="Thermal (MODIS)", use_container_width=True)
+                    else:
+                        st.caption("Thermal image not on this machine")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

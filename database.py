@@ -169,6 +169,24 @@ def export_training_data(city=None):
     conn.close()
     return rows
 
+def save_labels(record_id, city, timestamp, labels: dict):
+    conn   = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO labeled_events
+            (record_id, city, timestamp,
+             label_rain, label_heat, label_wind, label_snow, label_haze)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            record_id, city, timestamp,
+            labels["rain"], labels["heat"],
+            labels["wind"], labels["snow"], labels["haze"],
+        ))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
 
 def get_all_labeled_cities():
     """

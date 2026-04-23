@@ -95,7 +95,8 @@ def pixel_heat_score(img):
 
 # ── Text features ────────────────────────────────────────────────────────────
 
-def extract_text_features(texts: list[str]) -> np.ndarray:
+from typing import List
+def extract_text_features(texts: List[str]) -> np.ndarray:
     """
     Encode a list of article titles → mean-pooled 384-d vector.
     Falls back to zeros if sentence-transformers is unavailable.

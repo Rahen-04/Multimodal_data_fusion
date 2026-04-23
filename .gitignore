@@ -31,3 +31,13 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
+
+*.db
+models/*.json
+
+.env
+models/
+data/
+*.db
+__pycache__/
+*.pkl

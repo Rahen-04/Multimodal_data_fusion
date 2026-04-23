@@ -15,7 +15,6 @@ from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.utils.multiclass import unique_labels
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import GradientBoostingClassifier, VotingClassifier
 from sklearn.svm import SVC
 import warnings
 import sys
@@ -91,7 +90,7 @@ def build_best_pipeline(X_train, y_train):
         warnings.simplefilter("ignore")
         for name, pipe in candidates.items():
             scores = cross_val_score(pipe, X_train, y_train,
-                                     cv=min(3, len(X_train)//2),
+                                     cv = max(2, min(3, len(X_train)//3)) if len(X_train) >= 6 else 2,
                                      scoring="f1", error_score=0)
             mean_score = scores.mean()
             print(f"  [{name}] CV F1 = {mean_score:.3f}")
