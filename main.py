@@ -114,64 +114,53 @@ def _gibs_image(bbox, layer, fmt, style_param=""):
 
 def get_cloud_image(lat, lon):
     bbox = f"{lon-.7},{lat-.7},{lon+.7},{lat+.7}"
-    img, _ = _gibs_image(bbox,
-                         "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-                         "image/jpeg")
-    return img
+    img, url = _gibs_image(bbox,
+                           "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                           "image/jpeg")
+    return img, url 
 
 def get_thermal_image(lat, lon):
     bbox = f"{lon-.7},{lat-.7},{lon+.7},{lat+.7}"
-    img, _ = _gibs_image(bbox,
-                         "MODIS_Terra_Land_Surface_Temp_Day",
-                         "image/png",
-                         "&STYLES=default")
-    return img
+    img, url = _gibs_image(bbox,
+                           "MODIS_Terra_Land_Surface_Temp_Day",
+                           "image/png",
+                           "&STYLES=default")
+    return img, url   
 
-def image_analysis(lat,lon, weather_data):
+def image_analysis(lat, lon, weather_data):
     if lat is None:
         return {"cloud": 0, "heat": 0, "cloud_image": None, "thermal_image": None}
 
-    cloud_img   = get_cloud_image(lat, lon)
-    thermal_img = get_thermal_image(lat, lon)
+    cloud_img, cloud_url     = get_cloud_image(lat, lon)  
+    thermal_img, thermal_url = get_thermal_image(lat, lon) 
 
     cloud = pixel_cloud_score(cloud_img)
     heat  = pixel_heat_score(thermal_img)
     temp  = weather_data["main"]["temp"]
 
     if temp > 30:
-        heat = heat+0.1
+        heat = heat + 0.1
     if "storm" in weather_data["weather"][0]["description"].lower():
         cloud = max(cloud, 0.5)
 
-    bbox      = f"{lon-.7},{lat-.7},{lon+.7},{lat+.7}"
-    date_str  = get_gibs_date()
-    cloud_url = (
-        "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?"
-        "SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
-        "&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor"
-        "&FORMAT=image/jpeg&HEIGHT=512&WIDTH=512&SRS=EPSG:4326"
-        f"&TIME={date_str}&BBOX={bbox}"
-    )
-    thermal_url = (
-        "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?"
-        "SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
-        "&LAYERS=MODIS_Terra_Land_Surface_Temp_Day&STYLES=default"
-        "&FORMAT=image/png&HEIGHT=512&WIDTH=512&SRS=EPSG:4326"
-        f"&TIME={date_str}&BBOX={bbox}"
-    )
+    #  brightness check 
+    if cloud_img is not None:
+        arr = np.array(cloud_img)
+        if arr.mean() < 5:
+            print(f"[Warning] Cloud image appears black (mean={arr.mean():.2f})")
+            cloud_url = None
+
     cloud_path   = save_image(cloud_img, "cloud")
     thermal_path = save_image(thermal_img, "thermal")
 
     return {
-        "cloud": cloud,
-        "heat": heat,
-        "cloud_image": cloud_url,
-        "thermal_image": thermal_url,
-
-        "cloud_path": cloud_path,
+        "cloud":        cloud,
+        "heat":         heat,
+        "cloud_image":  cloud_url,    
+        "thermal_image": thermal_url, 
+        "cloud_path":   cloud_path,
         "thermal_path": thermal_path,
-
-        "_cloud_pil": cloud_img,
+        "_cloud_pil":   cloud_img,
         "_thermal_pil": thermal_img,
     }
 
