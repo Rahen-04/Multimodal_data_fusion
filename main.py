@@ -358,8 +358,6 @@ def analyze(city: str):
         # Merge ML + fallback
         analysis = {}
         for event in ["rain", "heat", "wind", "snow", "haze"]:
-            analysis = {}
-            for event in ["rain", "heat", "wind", "snow", "haze"]:
                 if event in ml_analysis:
                     ml = ml_analysis[event]
                     rule = rule_analysis[event]
