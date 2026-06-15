@@ -1,0 +1,669 @@
+2026-05-31 00:23:06,764 INFO Collection cycle started
+2026-05-31 00:23:56,054 ERROR Mumbai: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:24:16,205 ERROR Delhi: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:24:31,199 ERROR Bangalore: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:24:32,725 ERROR Kolkata: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2026-05-31 00:24:34,759 ERROR Chennai: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /analyze/Chennai (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-05-31 00:24:36,789 ERROR Hyderabad: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /analyze/Hyderabad (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-05-31 00:24:38,841 ERROR Pune: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /analyze/Pune (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-05-31 00:24:40,883 ERROR Ahmedabad: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /analyze/Ahmedabad (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-05-31 00:25:32,324 ERROR Jaipur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:25:50,285 ERROR Lucknow: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:26:09,435 ERROR Bhopal: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:26:24,437 ERROR Patna: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:27:24,826 INFO Collection cycle started
+2026-05-31 00:28:12,529 ERROR Mumbai: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:28:31,411 ERROR Delhi: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:28:49,987 ERROR Bangalore: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:29:10,027 ERROR Kolkata: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:29:29,289 ERROR Chennai: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:29:49,848 ERROR Hyderabad: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:30:16,333 ERROR Pune: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:30:37,504 ERROR Ahmedabad: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:30:56,208 ERROR Jaipur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:31:14,536 ERROR Lucknow: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:31:33,953 ERROR Bhopal: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:31:51,226 ERROR Patna: Expecting value: line 1 column 1 (char 0)
+2026-05-31 00:32:09,407 ERROR Raipur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:22:22,066 INFO Collection cycle started
+2026-05-31 23:22:49,716 ERROR Mumbai: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:23:03,476 ERROR Delhi: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:23:16,403 ERROR Bangalore: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:23:29,593 ERROR Kolkata: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:23:41,878 ERROR Chennai: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:23:54,719 ERROR Hyderabad: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:24:07,595 ERROR Pune: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:24:20,352 ERROR Ahmedabad: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:24:32,783 ERROR Jaipur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:26:02,797 WARNING Lucknow: timeout
+2026-05-31 23:27:32,822 WARNING Bhopal: timeout
+2026-05-31 23:29:02,898 INFO Collection cycle started
+2026-05-31 23:29:22,574 INFO Mumbai: OK
+2026-05-31 23:29:36,618 INFO Delhi: OK
+2026-05-31 23:29:49,634 INFO Bangalore: OK
+2026-05-31 23:30:05,324 INFO Kolkata: OK
+2026-05-31 23:30:28,138 INFO Chennai: OK
+2026-05-31 23:30:42,925 INFO Hyderabad: OK
+2026-05-31 23:30:57,330 INFO Pune: OK
+2026-05-31 23:31:11,446 INFO Ahmedabad: OK
+2026-05-31 23:31:25,263 INFO Jaipur: OK
+2026-05-31 23:31:38,763 INFO Lucknow: OK
+2026-05-31 23:31:52,240 INFO Bhopal: OK
+2026-05-31 23:32:05,458 INFO Patna: OK
+2026-05-31 23:32:19,624 INFO Raipur: OK
+2026-05-31 23:32:34,931 INFO Korba: OK
+2026-05-31 23:32:49,592 INFO Chandigarh: OK
+2026-05-31 23:33:04,652 INFO Srinagar: OK
+2026-05-31 23:33:21,254 INFO Guwahati: OK
+2026-05-31 23:33:36,304 INFO Thiruvananthapuram: OK
+2026-05-31 23:33:51,978 INFO Tokyo: OK
+2026-05-31 23:34:08,522 INFO Beijing: OK
+2026-05-31 23:34:22,858 INFO Shanghai: OK
+2026-05-31 23:34:38,157 INFO Seoul: OK
+2026-05-31 23:34:52,791 INFO Bangkok: OK
+2026-05-31 23:35:06,802 INFO Singapore: OK
+2026-05-31 23:35:20,640 INFO Dubai: OK
+2026-05-31 23:35:34,791 INFO Jakarta: OK
+2026-05-31 23:35:35,421 ERROR Kuala Lumpur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:35:49,530 INFO London: OK
+2026-05-31 23:36:04,630 INFO Paris: OK
+2026-05-31 23:36:19,196 INFO Berlin: OK
+2026-05-31 23:36:36,302 INFO Madrid: OK
+2026-05-31 23:36:51,899 INFO Rome: OK
+2026-05-31 23:37:06,989 INFO Amsterdam: OK
+2026-05-31 23:37:22,082 INFO Moscow: OK
+2026-05-31 23:37:22,789 ERROR New York: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:37:23,376 ERROR Los Angeles: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:37:38,605 INFO Chicago: OK
+2026-05-31 23:37:52,660 INFO Toronto: OK
+2026-05-31 23:38:07,202 INFO Vancouver: OK
+2026-05-31 23:38:07,879 ERROR Mexico City: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:38:08,499 ERROR São Paulo: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:38:09,130 ERROR Rio de Janeiro: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:38:09,791 ERROR Buenos Aires: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:38:25,148 INFO Cairo: OK
+2026-05-31 23:38:40,026 INFO Nairobi: OK
+2026-05-31 23:38:40,633 ERROR Cape Town: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:38:55,666 INFO Lagos: OK
+2026-05-31 23:39:10,450 INFO Sydney: OK
+2026-05-31 23:39:25,356 INFO Melbourne: OK
+2026-05-31 23:39:41,038 INFO Auckland: OK
+2026-05-31 23:39:41,038 INFO Cycle done — 42 OK, 8 failed
+2026-05-31 23:49:41,064 INFO Collection cycle started
+2026-05-31 23:49:54,538 INFO Mumbai: OK
+2026-05-31 23:50:15,392 INFO Delhi: OK
+2026-05-31 23:50:28,683 INFO Bangalore: OK
+2026-05-31 23:50:41,780 INFO Kolkata: OK
+2026-05-31 23:50:55,154 INFO Chennai: OK
+2026-05-31 23:51:08,388 INFO Hyderabad: OK
+2026-05-31 23:51:21,662 INFO Pune: OK
+2026-05-31 23:51:35,732 INFO Ahmedabad: OK
+2026-05-31 23:51:49,324 INFO Jaipur: OK
+2026-05-31 23:52:02,650 INFO Lucknow: OK
+2026-05-31 23:52:15,965 INFO Bhopal: OK
+2026-05-31 23:52:29,413 INFO Patna: OK
+2026-05-31 23:52:42,283 INFO Raipur: OK
+2026-05-31 23:52:54,883 INFO Korba: OK
+2026-05-31 23:53:07,985 INFO Chandigarh: OK
+2026-05-31 23:53:21,505 INFO Srinagar: OK
+2026-05-31 23:53:34,572 INFO Guwahati: OK
+2026-05-31 23:53:48,116 INFO Thiruvananthapuram: OK
+2026-05-31 23:54:02,373 INFO Tokyo: OK
+2026-05-31 23:54:15,333 INFO Beijing: OK
+2026-05-31 23:54:28,444 INFO Shanghai: OK
+2026-05-31 23:54:41,186 INFO Seoul: OK
+2026-05-31 23:54:54,242 INFO Bangkok: OK
+2026-05-31 23:55:14,874 INFO Singapore: OK
+2026-05-31 23:55:28,044 INFO Dubai: OK
+2026-05-31 23:55:41,527 INFO Jakarta: OK
+2026-05-31 23:55:42,138 ERROR Kuala Lumpur: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:55:55,199 INFO London: OK
+2026-05-31 23:56:08,639 INFO Paris: OK
+2026-05-31 23:56:21,753 INFO Berlin: OK
+2026-05-31 23:56:34,842 INFO Madrid: OK
+2026-05-31 23:56:47,394 INFO Rome: OK
+2026-05-31 23:57:01,195 INFO Amsterdam: OK
+2026-05-31 23:57:14,621 INFO Moscow: OK
+2026-05-31 23:57:15,273 ERROR New York: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:57:15,917 ERROR Los Angeles: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:57:29,036 INFO Chicago: OK
+2026-05-31 23:57:41,844 INFO Toronto: OK
+2026-05-31 23:57:54,272 INFO Vancouver: OK
+2026-05-31 23:57:54,864 ERROR Mexico City: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:57:55,623 ERROR São Paulo: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:57:56,237 ERROR Rio de Janeiro: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:57:56,767 ERROR Buenos Aires: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:58:11,165 INFO Cairo: OK
+2026-05-31 23:58:24,895 INFO Nairobi: OK
+2026-05-31 23:58:25,501 ERROR Cape Town: Expecting value: line 1 column 1 (char 0)
+2026-05-31 23:58:39,284 INFO Lagos: OK
+2026-05-31 23:58:52,542 INFO Sydney: OK
+2026-05-31 23:59:05,663 INFO Melbourne: OK
+2026-05-31 23:59:18,697 INFO Auckland: OK
+2026-05-31 23:59:18,697 INFO Cycle done — 42 OK, 8 failed
+2026-06-01 00:09:18,715 INFO Collection cycle started
+2026-06-01 00:09:35,453 INFO Mumbai: OK
+2026-06-01 00:09:51,928 INFO Delhi: OK
+2026-06-01 00:10:15,894 INFO Bangalore: OK
+2026-06-01 00:10:31,073 INFO Kolkata: OK
+2026-06-01 00:10:44,794 INFO Chennai: OK
+2026-06-01 00:10:58,756 INFO Hyderabad: OK
+2026-06-01 00:11:13,135 INFO Pune: OK
+2026-06-01 00:11:33,422 INFO Ahmedabad: OK
+2026-06-01 00:11:44,091 WARNING Jaipur: Could not retrieve weather data
+2026-06-01 00:11:54,865 WARNING Lucknow: Could not retrieve weather data
+2026-06-01 00:12:09,871 INFO Bhopal: OK
+2026-06-01 00:12:23,290 INFO Patna: OK
+2026-06-01 00:12:36,217 INFO Raipur: OK
+2026-06-01 00:12:48,683 INFO Korba: OK
+2026-06-01 00:13:02,036 INFO Chandigarh: OK
+2026-06-01 00:13:15,203 INFO Srinagar: OK
+2026-06-01 00:13:29,585 INFO Guwahati: OK
+2026-06-01 00:13:44,290 INFO Thiruvananthapuram: OK
+2026-06-01 00:13:57,020 INFO Tokyo: OK
+2026-06-01 00:14:10,241 INFO Beijing: OK
+2026-06-01 00:14:23,651 INFO Shanghai: OK
+2026-06-01 00:14:36,412 INFO Seoul: OK
+2026-06-01 00:14:49,105 INFO Bangkok: OK
+2026-06-01 00:15:01,539 INFO Singapore: OK
+2026-06-01 00:15:16,139 INFO Dubai: OK
+2026-06-01 00:15:29,494 INFO Jakarta: OK
+2026-06-01 00:15:30,219 ERROR Kuala Lumpur: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:15:43,221 INFO London: OK
+2026-06-01 00:15:56,212 INFO Paris: OK
+2026-06-01 00:16:09,050 INFO Berlin: OK
+2026-06-01 00:16:22,082 INFO Madrid: OK
+2026-06-01 00:16:35,078 INFO Rome: OK
+2026-06-01 00:16:48,198 INFO Amsterdam: OK
+2026-06-01 00:17:03,472 INFO Moscow: OK
+2026-06-01 00:17:04,135 ERROR New York: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:17:04,780 ERROR Los Angeles: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:17:18,058 INFO Chicago: OK
+2026-06-01 00:17:31,060 INFO Toronto: OK
+2026-06-01 00:17:44,335 INFO Vancouver: OK
+2026-06-01 00:17:45,034 ERROR Mexico City: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:17:45,694 ERROR São Paulo: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:17:46,310 ERROR Rio de Janeiro: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:17:46,856 ERROR Buenos Aires: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:18:00,239 INFO Cairo: OK
+2026-06-01 00:18:13,188 INFO Nairobi: OK
+2026-06-01 00:18:13,897 ERROR Cape Town: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:18:26,379 INFO Lagos: OK
+2026-06-01 00:18:39,283 INFO Sydney: OK
+2026-06-01 00:18:52,355 INFO Melbourne: OK
+2026-06-01 00:19:04,813 INFO Auckland: OK
+2026-06-01 00:19:04,813 INFO Cycle done — 40 OK, 10 failed
+2026-06-01 00:29:04,826 INFO Collection cycle started
+2026-06-01 00:29:22,421 INFO Mumbai: OK
+2026-06-01 00:29:36,961 INFO Delhi: OK
+2026-06-01 00:29:52,062 INFO Bangalore: OK
+2026-06-01 00:30:18,872 INFO Kolkata: OK
+2026-06-01 00:30:37,639 INFO Chennai: OK
+2026-06-01 00:30:53,483 INFO Hyderabad: OK
+2026-06-01 00:31:10,170 INFO Pune: OK
+2026-06-01 00:31:25,804 INFO Ahmedabad: OK
+2026-06-01 00:31:40,798 INFO Jaipur: OK
+2026-06-01 00:31:54,772 INFO Lucknow: OK
+2026-06-01 00:32:08,664 INFO Bhopal: OK
+2026-06-01 00:32:23,040 INFO Patna: OK
+2026-06-01 00:32:36,797 INFO Raipur: OK
+2026-06-01 00:32:50,392 INFO Korba: OK
+2026-06-01 00:33:04,453 INFO Chandigarh: OK
+2026-06-01 00:33:19,572 INFO Srinagar: OK
+2026-06-01 00:33:33,510 INFO Guwahati: OK
+2026-06-01 00:33:47,201 INFO Thiruvananthapuram: OK
+2026-06-01 00:34:01,697 INFO Tokyo: OK
+2026-06-01 00:34:16,401 INFO Beijing: OK
+2026-06-01 00:34:30,311 INFO Shanghai: OK
+2026-06-01 00:34:44,543 INFO Seoul: OK
+2026-06-01 00:34:58,548 INFO Bangkok: OK
+2026-06-01 00:35:12,224 INFO Singapore: OK
+2026-06-01 00:35:25,922 INFO Dubai: OK
+2026-06-01 00:35:40,847 INFO Jakarta: OK
+2026-06-01 00:35:41,567 ERROR Kuala Lumpur: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:35:56,045 INFO London: OK
+2026-06-01 00:36:11,110 INFO Paris: OK
+2026-06-01 00:36:25,424 INFO Berlin: OK
+2026-06-01 00:36:40,092 INFO Madrid: OK
+2026-06-01 00:36:55,911 INFO Rome: OK
+2026-06-01 00:37:11,384 INFO Amsterdam: OK
+2026-06-01 00:37:27,702 INFO Moscow: OK
+2026-06-01 00:37:28,324 ERROR New York: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:37:28,982 ERROR Los Angeles: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:37:44,250 INFO Chicago: OK
+2026-06-01 00:38:28,399 INFO Toronto: OK
+2026-06-01 00:38:42,435 INFO Vancouver: OK
+2026-06-01 00:38:43,053 ERROR Mexico City: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:38:43,639 ERROR São Paulo: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:38:44,272 ERROR Rio de Janeiro: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:38:44,961 ERROR Buenos Aires: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:38:59,163 INFO Cairo: OK
+2026-06-01 00:39:14,213 INFO Nairobi: OK
+2026-06-01 00:39:14,821 ERROR Cape Town: Expecting value: line 1 column 1 (char 0)
+2026-06-01 00:39:29,354 INFO Lagos: OK
+2026-06-01 00:39:43,370 INFO Sydney: OK
+2026-06-01 00:39:57,880 INFO Melbourne: OK
+2026-06-01 00:40:21,423 INFO Auckland: OK
+2026-06-01 00:40:21,423 INFO Cycle done — 42 OK, 8 failed
+2026-06-01 13:12:11,082 INFO Collection cycle started
+2026-06-01 13:12:32,152 INFO Mumbai: OK
+2026-06-01 13:12:46,402 WARNING Delhi: Could not retrieve weather data
+2026-06-01 13:12:57,735 WARNING Bangalore: Could not retrieve weather data
+2026-06-01 13:14:27,747 WARNING Kolkata: timeout
+2026-06-01 13:14:42,116 WARNING Chennai: Could not retrieve weather data
+2026-06-01 13:15:11,057 INFO Hyderabad: OK
+2026-06-01 13:16:41,095 WARNING Pune: timeout
+2026-06-01 13:32:05,822 WARNING Ahmedabad: timeout
+2026-06-01 13:32:06,036 WARNING Jaipur: Could not retrieve weather data
+2026-06-01 13:32:06,111 WARNING Lucknow: Could not retrieve weather data
+2026-06-01 13:32:06,183 WARNING Bhopal: Could not retrieve weather data
+2026-06-01 13:32:06,228 WARNING Patna: Could not retrieve weather data
+2026-06-01 13:32:06,262 WARNING Raipur: Could not retrieve weather data
+2026-06-01 13:32:06,280 WARNING Korba: Could not retrieve weather data
+2026-06-01 13:32:06,293 WARNING Chandigarh: Could not retrieve weather data
+2026-06-01 13:32:06,320 WARNING Srinagar: Could not retrieve weather data
+2026-06-01 13:32:06,340 WARNING Guwahati: Could not retrieve weather data
+2026-06-01 13:32:06,352 WARNING Thiruvananthapuram: Could not retrieve weather data
+2026-06-01 13:32:06,366 WARNING Tokyo: Could not retrieve weather data
+2026-06-01 13:32:06,397 WARNING Beijing: Could not retrieve weather data
+2026-06-01 13:32:06,413 WARNING Shanghai: Could not retrieve weather data
+2026-06-01 13:32:06,444 WARNING Seoul: Could not retrieve weather data
+2026-06-01 13:32:06,460 WARNING Bangkok: Could not retrieve weather data
+2026-06-01 13:32:06,491 WARNING Singapore: Could not retrieve weather data
+2026-06-01 13:32:06,509 WARNING Dubai: Could not retrieve weather data
+2026-06-01 13:32:06,530 WARNING Jakarta: Could not retrieve weather data
+2026-06-01 13:32:06,548 WARNING Kuala Lumpur: Could not retrieve weather data
+2026-06-01 13:32:06,572 WARNING London: Could not retrieve weather data
+2026-06-01 13:32:06,590 WARNING Paris: Could not retrieve weather data
+2026-06-01 13:32:06,604 WARNING Berlin: Could not retrieve weather data
+2026-06-01 13:32:06,614 WARNING Madrid: Could not retrieve weather data
+2026-06-01 13:32:06,625 WARNING Rome: Could not retrieve weather data
+2026-06-01 13:32:06,662 WARNING Amsterdam: Could not retrieve weather data
+2026-06-01 13:32:06,695 WARNING Moscow: Could not retrieve weather data
+2026-06-01 13:32:06,708 WARNING New York: Could not retrieve weather data
+2026-06-01 13:32:06,720 WARNING Los Angeles: Could not retrieve weather data
+2026-06-01 13:32:06,736 WARNING Chicago: Could not retrieve weather data
+2026-06-01 13:32:06,752 WARNING Toronto: Could not retrieve weather data
+2026-06-01 13:32:06,769 WARNING Vancouver: Could not retrieve weather data
+2026-06-01 13:32:06,779 WARNING Mexico City: Could not retrieve weather data
+2026-06-01 13:32:06,789 WARNING São Paulo: Could not retrieve weather data
+2026-06-01 13:32:06,822 WARNING Rio de Janeiro: Could not retrieve weather data
+2026-06-01 13:32:06,835 WARNING Buenos Aires: Could not retrieve weather data
+2026-06-01 13:32:06,850 WARNING Cairo: Could not retrieve weather data
+2026-06-01 13:32:06,865 WARNING Nairobi: Could not retrieve weather data
+2026-06-01 13:32:06,881 WARNING Cape Town: Could not retrieve weather data
+2026-06-01 13:32:06,895 WARNING Lagos: Could not retrieve weather data
+2026-06-01 13:32:06,909 WARNING Sydney: Could not retrieve weather data
+2026-06-01 13:32:06,921 WARNING Melbourne: Could not retrieve weather data
+2026-06-01 13:32:06,957 WARNING Auckland: Could not retrieve weather data
+2026-06-01 13:32:06,957 INFO Cycle done — 2 OK, 48 failed
+2026-06-01 13:37:27,532 INFO Collection cycle started
+2026-06-01 13:38:16,747 INFO Mumbai: OK
+2026-06-01 13:38:40,727 INFO Delhi: OK
+2026-06-01 13:39:06,660 INFO Bangalore: OK
+2026-06-01 13:39:32,887 INFO Kolkata: OK
+2026-06-01 13:39:56,630 INFO Chennai: OK
+2026-06-01 13:40:26,770 INFO Hyderabad: OK
+2026-06-01 13:40:51,596 INFO Pune: OK
+2026-06-01 13:41:14,334 INFO Ahmedabad: OK
+2026-06-01 13:41:40,782 INFO Jaipur: OK
+2026-06-01 13:42:04,575 INFO Lucknow: OK
+2026-06-01 13:42:30,089 INFO Bhopal: OK
+2026-06-01 13:42:53,863 INFO Patna: OK
+2026-06-01 13:43:19,982 INFO Raipur: OK
+2026-06-01 13:43:43,626 INFO Korba: OK
+2026-06-01 13:44:09,288 INFO Chandigarh: OK
+2026-06-01 13:44:32,935 INFO Srinagar: OK
+2026-06-01 13:44:56,622 INFO Guwahati: OK
+2026-06-01 13:45:26,357 INFO Thiruvananthapuram: OK
+2026-06-01 13:45:52,973 INFO Tokyo: OK
+2026-06-01 13:46:18,884 INFO Beijing: OK
+2026-06-01 13:46:44,751 INFO Shanghai: OK
+2026-06-01 13:47:10,387 INFO Seoul: OK
+2026-06-01 13:47:35,350 INFO Bangkok: OK
+2026-06-01 13:47:59,182 INFO Singapore: OK
+2026-06-01 13:48:20,503 INFO Dubai: OK
+2026-06-01 13:48:37,857 INFO Jakarta: OK
+2026-06-01 13:48:50,893 INFO Kuala Lumpur: OK
+2026-06-01 13:50:20,909 WARNING London: timeout
+2026-06-01 13:50:42,189 INFO Paris: OK
+2026-06-01 13:51:00,419 INFO Berlin: OK
+2026-06-01 13:51:17,911 INFO Madrid: OK
+2026-06-01 13:51:34,968 INFO Rome: OK
+2026-06-01 13:51:51,310 INFO Amsterdam: OK
+2026-06-01 13:52:09,928 INFO Moscow: OK
+2026-06-01 13:52:24,482 INFO New York: OK
+2026-06-01 13:52:36,750 INFO Los Angeles: OK
+2026-06-01 13:52:54,132 INFO Chicago: OK
+2026-06-01 13:53:11,262 INFO Toronto: OK
+2026-06-01 13:53:30,905 INFO Vancouver: OK
+2026-06-01 13:53:49,275 INFO Mexico City: OK
+2026-06-01 13:54:10,474 INFO São Paulo: OK
+2026-06-01 13:54:33,119 INFO Rio de Janeiro: OK
+2026-06-01 13:54:52,866 INFO Buenos Aires: OK
+2026-06-01 13:55:17,462 INFO Cairo: OK
+2026-06-01 13:55:41,087 INFO Nairobi: OK
+2026-06-01 13:56:00,050 INFO Cape Town: OK
+2026-06-01 13:56:23,640 INFO Lagos: OK
+2026-06-01 13:56:46,792 INFO Sydney: OK
+2026-06-01 13:57:11,132 INFO Melbourne: OK
+2026-06-01 13:57:34,446 INFO Auckland: OK
+2026-06-01 13:57:34,446 INFO Cycle done — 49 OK, 1 failed
+2026-06-01 14:07:34,448 INFO Collection cycle started
+2026-06-01 14:07:51,120 INFO Mumbai: OK
+2026-06-01 14:08:07,872 INFO Delhi: OK
+2026-06-01 14:09:37,879 WARNING Bangalore: timeout
+2026-06-01 14:11:07,891 WARNING Kolkata: timeout
+2026-06-01 14:12:37,917 WARNING Chennai: timeout
+2026-06-01 14:18:41,910 INFO Collection cycle started
+2026-06-01 14:20:11,952 WARNING Mumbai: timeout
+2026-06-01 14:20:34,843 INFO Delhi: OK
+2026-06-01 14:20:58,716 INFO Bangalore: OK
+2026-06-01 14:21:20,242 INFO Kolkata: OK
+2026-06-01 14:21:42,138 INFO Chennai: OK
+2026-06-01 14:22:03,624 INFO Hyderabad: OK
+2026-06-01 14:22:26,833 INFO Pune: OK
+2026-06-01 14:22:49,844 INFO Ahmedabad: OK
+2026-06-01 14:23:13,938 INFO Jaipur: OK
+2026-06-01 14:23:39,611 INFO Lucknow: OK
+2026-06-01 14:24:00,851 INFO Bhopal: OK
+2026-06-01 14:24:24,199 INFO Patna: OK
+2026-06-01 14:24:46,397 INFO Raipur: OK
+2026-06-01 14:25:08,924 INFO Korba: OK
+2026-06-01 14:25:30,978 INFO Chandigarh: OK
+2026-06-01 14:25:54,966 INFO Srinagar: OK
+2026-06-01 14:26:18,054 INFO Guwahati: OK
+2026-06-01 14:26:43,117 INFO Thiruvananthapuram: OK
+2026-06-01 14:27:05,834 INFO Tokyo: OK
+2026-06-01 14:27:28,567 INFO Beijing: OK
+2026-06-01 14:27:52,936 INFO Shanghai: OK
+2026-06-01 14:28:17,143 INFO Seoul: OK
+2026-06-01 14:28:41,226 INFO Bangkok: OK
+2026-06-01 14:29:08,527 INFO Singapore: OK
+2026-06-01 14:29:34,280 INFO Dubai: OK
+2026-06-01 14:30:00,504 INFO Jakarta: OK
+2026-06-01 14:30:33,974 INFO Kuala Lumpur: OK
+2026-06-01 14:31:07,727 INFO London: OK
+2026-06-01 14:31:33,668 INFO Paris: OK
+2026-06-01 14:32:00,273 INFO Berlin: OK
+2026-06-01 14:32:25,945 INFO Madrid: OK
+2026-06-01 14:32:51,815 INFO Rome: OK
+2026-06-01 14:33:17,406 INFO Amsterdam: OK
+2026-06-01 14:33:38,876 INFO Moscow: OK
+2026-06-01 14:33:52,668 INFO New York: OK
+2026-06-01 14:34:08,880 INFO Los Angeles: OK
+2026-06-01 14:34:27,724 INFO Chicago: OK
+2026-06-01 14:34:45,717 INFO Toronto: OK
+2026-06-01 14:35:04,562 INFO Vancouver: OK
+2026-06-01 14:35:19,069 INFO Mexico City: OK
+2026-06-01 14:35:33,053 INFO São Paulo: OK
+2026-06-01 14:35:48,465 INFO Rio de Janeiro: OK
+2026-06-01 14:36:06,363 INFO Buenos Aires: OK
+2026-06-01 14:36:26,961 INFO Cairo: OK
+2026-06-01 14:36:48,608 INFO Nairobi: OK
+2026-06-01 14:37:05,322 INFO Cape Town: OK
+2026-06-01 14:37:25,324 INFO Lagos: OK
+2026-06-01 14:37:45,296 INFO Sydney: OK
+2026-06-01 14:38:04,752 INFO Melbourne: OK
+2026-06-01 14:38:26,019 INFO Auckland: OK
+2026-06-01 14:38:26,019 INFO Cycle done — 49 OK, 1 failed
+2026-06-01 14:48:26,022 INFO Collection cycle started
+2026-06-01 14:48:55,342 INFO Mumbai: OK
+2026-06-01 14:49:25,003 INFO Delhi: OK
+2026-06-01 14:49:53,697 INFO Bangalore: OK
+2026-06-01 14:50:23,737 INFO Kolkata: OK
+2026-06-01 14:50:53,440 INFO Chennai: OK
+2026-06-01 14:51:22,781 INFO Hyderabad: OK
+2026-06-01 14:51:50,642 INFO Pune: OK
+2026-06-01 14:52:14,302 INFO Ahmedabad: OK
+2026-06-01 14:52:38,578 INFO Jaipur: OK
+2026-06-01 14:52:59,941 INFO Lucknow: OK
+2026-06-01 14:53:20,501 INFO Bhopal: OK
+2026-06-01 14:53:41,639 INFO Patna: OK
+2026-06-01 14:54:05,447 INFO Raipur: OK
+2026-06-01 14:54:27,626 INFO Korba: OK
+2026-06-01 14:54:50,132 INFO Chandigarh: OK
+2026-06-01 14:55:12,698 INFO Srinagar: OK
+2026-06-01 14:55:43,145 INFO Guwahati: OK
+2026-06-01 14:56:13,138 INFO Thiruvananthapuram: OK
+2026-06-01 14:56:44,070 INFO Tokyo: OK
+2026-06-01 14:57:14,882 INFO Beijing: OK
+2026-06-01 14:57:46,615 INFO Shanghai: OK
+2026-06-01 14:58:18,267 INFO Seoul: OK
+2026-06-01 14:58:58,927 INFO Bangkok: OK
+2026-06-01 14:59:32,116 INFO Singapore: OK
+2026-06-01 15:00:01,431 INFO Dubai: OK
+2026-06-01 15:00:37,207 INFO Jakarta: OK
+2026-06-01 15:01:04,902 INFO Kuala Lumpur: OK
+2026-06-01 15:01:36,895 INFO London: OK
+2026-06-01 15:02:08,487 INFO Paris: OK
+2026-06-01 15:02:41,382 INFO Berlin: OK
+2026-06-01 15:03:14,646 INFO Madrid: OK
+2026-06-01 15:03:48,495 INFO Rome: OK
+2026-06-01 15:04:17,037 INFO Amsterdam: OK
+2026-06-01 15:04:46,747 INFO Moscow: OK
+2026-06-01 15:05:13,422 INFO New York: OK
+2026-06-01 15:05:32,724 INFO Los Angeles: OK
+2026-06-01 15:06:48,968 INFO Chicago: OK
+2026-06-01 15:07:13,009 INFO Toronto: OK
+2026-06-01 15:07:39,592 INFO Vancouver: OK
+2026-06-01 15:07:59,681 INFO Mexico City: OK
+2026-06-01 15:08:24,577 INFO São Paulo: OK
+2026-06-01 15:08:45,287 INFO Rio de Janeiro: OK
+2026-06-01 15:09:06,551 INFO Buenos Aires: OK
+2026-06-01 15:09:33,014 INFO Cairo: OK
+2026-06-01 15:10:01,175 INFO Nairobi: OK
+2026-06-01 15:10:26,071 INFO Cape Town: OK
+2026-06-01 15:10:54,410 INFO Lagos: OK
+2026-06-01 15:11:22,499 INFO Sydney: OK
+2026-06-01 15:11:51,144 INFO Melbourne: OK
+2026-06-01 15:12:17,325 INFO Auckland: OK
+2026-06-01 15:12:17,326 INFO Cycle done — 50 OK, 0 failed
+2026-06-01 15:22:17,328 INFO Collection cycle started
+2026-06-01 15:22:46,716 INFO Mumbai: OK
+2026-06-01 15:23:11,217 INFO Delhi: OK
+2026-06-01 15:23:36,959 INFO Bangalore: OK
+2026-06-01 15:24:02,188 INFO Kolkata: OK
+2026-06-01 15:24:28,892 INFO Chennai: OK
+2026-06-01 15:24:57,200 INFO Hyderabad: OK
+2026-06-01 15:25:23,527 INFO Pune: OK
+2026-06-01 15:25:49,476 INFO Ahmedabad: OK
+2026-06-01 15:26:17,161 INFO Jaipur: OK
+2026-06-01 15:26:43,051 INFO Lucknow: OK
+2026-06-01 15:27:08,427 INFO Bhopal: OK
+2026-06-01 15:27:33,914 INFO Patna: OK
+2026-06-01 15:27:58,166 INFO Raipur: OK
+2026-06-01 15:28:21,897 INFO Korba: OK
+2026-06-01 15:28:45,649 INFO Chandigarh: OK
+2026-06-01 15:29:09,485 INFO Srinagar: OK
+2026-06-01 15:29:33,356 INFO Guwahati: OK
+2026-06-01 15:29:55,842 INFO Thiruvananthapuram: OK
+2026-06-01 15:30:33,419 INFO Tokyo: OK
+2026-06-01 15:30:59,688 INFO Beijing: OK
+2026-06-01 15:31:23,016 INFO Shanghai: OK
+2026-06-01 15:31:47,088 INFO Seoul: OK
+2026-06-01 15:32:10,336 INFO Bangkok: OK
+2026-06-01 15:32:33,325 INFO Singapore: OK
+2026-06-01 15:32:57,479 INFO Dubai: OK
+2026-06-01 15:33:21,447 INFO Jakarta: OK
+2026-06-01 15:33:41,013 INFO Kuala Lumpur: OK
+2026-06-01 15:34:06,505 INFO London: OK
+2026-06-01 15:34:31,321 INFO Paris: OK
+2026-06-01 15:34:54,220 INFO Berlin: OK
+2026-06-01 15:35:17,769 INFO Madrid: OK
+2026-06-01 15:35:44,228 INFO Rome: OK
+2026-06-01 15:36:07,795 INFO Amsterdam: OK
+2026-06-01 15:36:30,949 INFO Moscow: OK
+2026-06-01 15:36:49,935 INFO New York: OK
+2026-06-01 15:37:10,185 INFO Los Angeles: OK
+2026-06-01 15:37:33,105 INFO Chicago: OK
+2026-06-01 15:37:56,104 INFO Toronto: OK
+2026-06-01 15:38:20,057 INFO Vancouver: OK
+2026-06-01 15:38:39,756 INFO Mexico City: OK
+2026-06-01 15:38:59,762 INFO São Paulo: OK
+2026-06-01 15:39:19,510 INFO Rio de Janeiro: OK
+2026-06-01 15:39:38,444 INFO Buenos Aires: OK
+2026-06-01 15:40:01,814 INFO Cairo: OK
+2026-06-01 15:40:31,727 INFO Nairobi: OK
+2026-06-01 15:40:51,237 INFO Cape Town: OK
+2026-06-01 15:41:14,351 INFO Lagos: OK
+2026-06-01 15:41:37,739 INFO Sydney: OK
+2026-06-01 15:42:00,803 INFO Melbourne: OK
+2026-06-01 15:42:24,017 INFO Auckland: OK
+2026-06-01 15:42:24,017 INFO Cycle done — 50 OK, 0 failed
+2026-06-01 15:52:24,020 INFO Collection cycle started
+2026-06-01 15:52:50,077 INFO Mumbai: OK
+2026-06-01 15:53:15,718 INFO Delhi: OK
+2026-06-01 15:53:46,145 INFO Bangalore: OK
+2026-06-01 15:54:12,574 INFO Kolkata: OK
+2026-06-01 15:54:39,854 INFO Chennai: OK
+2026-06-01 15:55:06,456 INFO Hyderabad: OK
+2026-06-01 15:55:33,605 INFO Pune: OK
+2026-06-01 15:56:02,756 INFO Ahmedabad: OK
+2026-06-01 15:56:29,278 INFO Jaipur: OK
+2026-06-01 15:59:40,630 INFO Lucknow: OK
+2026-06-01 15:59:52,129 WARNING Bhopal: Could not retrieve weather data
+2026-06-01 16:00:03,454 WARNING Patna: Could not retrieve weather data
+2026-06-01 16:00:14,898 WARNING Raipur: Could not retrieve weather data
+2026-06-01 16:01:05,618 INFO Korba: OK
+2026-06-01 16:01:23,931 INFO Chandigarh: OK
+2026-06-01 16:01:44,225 INFO Srinagar: OK
+2026-06-01 16:02:08,241 INFO Guwahati: OK
+2026-06-01 16:02:24,358 INFO Thiruvananthapuram: OK
+2026-06-01 16:02:41,507 INFO Tokyo: OK
+2026-06-01 16:03:09,041 INFO Beijing: OK
+2026-06-01 16:03:36,945 INFO Shanghai: OK
+2026-06-01 16:03:51,707 INFO Seoul: OK
+2026-06-01 16:04:09,620 INFO Bangkok: OK
+2026-06-01 16:04:23,614 INFO Singapore: OK
+2026-06-01 16:04:38,305 INFO Dubai: OK
+2026-06-01 16:04:53,468 INFO Jakarta: OK
+2026-06-01 16:05:06,402 INFO Kuala Lumpur: OK
+2026-06-01 16:05:21,929 INFO London: OK
+2026-06-01 16:05:43,866 INFO Paris: OK
+2026-06-01 16:06:00,352 INFO Berlin: OK
+2026-06-01 16:06:14,321 INFO Madrid: OK
+2026-06-01 16:06:29,943 INFO Rome: OK
+2026-06-01 16:06:45,005 INFO Amsterdam: OK
+2026-06-01 16:07:00,072 INFO Moscow: OK
+2026-06-01 16:07:13,351 INFO New York: OK
+2026-06-01 16:07:24,511 INFO Los Angeles: OK
+2026-06-01 16:07:38,168 INFO Chicago: OK
+2026-06-01 16:07:54,897 INFO Toronto: OK
+2026-06-01 16:08:09,754 INFO Vancouver: OK
+2026-06-01 16:08:20,600 INFO Mexico City: OK
+2026-06-01 16:08:32,743 INFO São Paulo: OK
+2026-06-01 16:08:44,982 INFO Rio de Janeiro: OK
+2026-06-01 16:08:55,901 INFO Buenos Aires: OK
+2026-06-01 16:09:08,694 INFO Cairo: OK
+2026-06-01 16:09:21,704 INFO Nairobi: OK
+2026-06-01 16:09:31,482 INFO Cape Town: OK
+2026-06-01 16:09:44,965 INFO Lagos: OK
+2026-06-01 16:09:56,907 INFO Sydney: OK
+2026-06-01 16:10:21,825 INFO Melbourne: OK
+2026-06-01 16:10:37,681 INFO Auckland: OK
+2026-06-01 16:10:37,681 INFO Cycle done — 47 OK, 3 failed
+2026-06-01 16:20:37,682 INFO Collection cycle started
+2026-06-01 16:20:52,757 INFO Mumbai: OK
+2026-06-01 16:21:08,638 INFO Delhi: OK
+2026-06-01 16:21:22,282 INFO Bangalore: OK
+2026-06-01 16:21:36,323 INFO Kolkata: OK
+2026-06-01 16:21:50,147 INFO Chennai: OK
+2026-06-01 16:22:14,900 INFO Hyderabad: OK
+2026-06-01 16:22:30,166 INFO Pune: OK
+2026-06-01 16:22:45,817 INFO Ahmedabad: OK
+2026-06-01 16:23:00,457 INFO Jaipur: OK
+2026-06-01 16:23:16,910 INFO Lucknow: OK
+2026-06-01 16:23:38,150 INFO Bhopal: OK
+2026-06-01 16:23:56,975 INFO Patna: OK
+2026-06-01 16:24:13,384 INFO Raipur: OK
+2026-06-01 16:24:52,136 INFO Korba: OK
+2026-06-01 16:25:06,647 INFO Chandigarh: OK
+2026-06-01 16:25:23,619 INFO Srinagar: OK
+2026-06-01 16:25:36,553 INFO Guwahati: OK
+2026-06-01 16:25:49,182 INFO Thiruvananthapuram: OK
+2026-06-01 16:26:02,124 INFO Tokyo: OK
+2026-06-01 16:26:16,905 INFO Beijing: OK
+2026-06-01 16:26:28,892 INFO Shanghai: OK
+2026-06-01 16:26:42,529 INFO Seoul: OK
+2026-06-01 16:26:55,915 INFO Bangkok: OK
+2026-06-01 16:27:08,789 INFO Singapore: OK
+2026-06-01 16:27:22,898 INFO Dubai: OK
+2026-06-01 16:27:37,278 INFO Jakarta: OK
+2026-06-01 16:27:50,917 INFO Kuala Lumpur: OK
+2026-06-01 16:28:04,837 INFO London: OK
+2026-06-01 16:28:19,402 INFO Paris: OK
+2026-06-01 16:28:32,751 INFO Berlin: OK
+2026-06-01 16:28:46,656 INFO Madrid: OK
+2026-06-01 16:29:01,345 INFO Rome: OK
+2026-06-01 16:29:15,936 INFO Amsterdam: OK
+2026-06-01 16:29:29,930 INFO Moscow: OK
+2026-06-01 16:29:41,045 INFO New York: OK
+2026-06-01 16:29:52,169 INFO Los Angeles: OK
+2026-06-01 16:30:23,356 INFO Chicago: OK
+2026-06-01 16:30:44,817 INFO Toronto: OK
+2026-06-01 16:31:05,086 INFO Vancouver: OK
+2026-06-01 16:31:20,897 INFO Mexico City: OK
+2026-06-01 16:31:35,749 INFO São Paulo: OK
+2026-06-01 16:31:50,536 INFO Rio de Janeiro: OK
+2026-06-01 16:32:07,932 INFO Buenos Aires: OK
+2026-06-01 16:32:25,779 INFO Cairo: OK
+2026-06-01 16:32:43,946 INFO Nairobi: OK
+2026-06-01 16:32:57,123 INFO Cape Town: OK
+2026-06-01 16:33:12,237 INFO Lagos: OK
+2026-06-01 16:33:28,864 INFO Sydney: OK
+2026-06-01 16:33:45,013 INFO Melbourne: OK
+2026-06-01 16:34:01,095 INFO Auckland: OK
+2026-06-01 16:34:01,096 INFO Cycle done — 50 OK, 0 failed
+2026-06-01 16:44:01,097 INFO Collection cycle started
+2026-06-01 16:44:17,737 INFO Mumbai: OK
+2026-06-01 16:44:35,082 INFO Delhi: OK
+2026-06-01 16:44:49,155 INFO Bangalore: OK
+2026-06-01 16:45:02,221 INFO Kolkata: OK
+2026-06-01 16:45:16,674 INFO Chennai: OK
+2026-06-01 16:45:30,304 INFO Hyderabad: OK
+2026-06-01 16:45:43,258 INFO Pune: OK
+2026-06-01 16:45:56,326 INFO Ahmedabad: OK
+2026-06-01 16:46:10,136 INFO Jaipur: OK
+2026-06-01 16:46:23,722 INFO Lucknow: OK
+2026-06-01 16:46:37,018 INFO Bhopal: OK
+2026-06-01 16:46:51,771 INFO Patna: OK
+2026-06-01 16:47:05,500 INFO Raipur: OK
+2026-06-01 16:47:19,626 INFO Korba: OK
+2026-06-01 16:47:34,615 INFO Chandigarh: OK
+2026-06-01 16:47:49,011 INFO Srinagar: OK
+2026-06-01 16:48:04,366 INFO Guwahati: OK
+2026-06-01 16:48:25,258 INFO Thiruvananthapuram: OK
+2026-06-01 18:55:16,420 WARNING Tokyo: timeout
+2026-06-01 23:50:27,993 WARNING Beijing: timeout
+2026-06-01 23:50:39,803 WARNING Shanghai: Could not retrieve weather data
+2026-06-01 23:50:50,865 WARNING Seoul: Could not retrieve weather data
+2026-06-01 23:50:50,879 WARNING Bangkok: Could not retrieve weather data
+2026-06-01 23:50:50,895 WARNING Singapore: Could not retrieve weather data
+2026-06-01 23:50:50,909 WARNING Dubai: Could not retrieve weather data
+2026-06-01 23:50:50,922 WARNING Jakarta: Could not retrieve weather data
+2026-06-01 23:50:50,935 WARNING Kuala Lumpur: Could not retrieve weather data
+2026-06-01 23:50:50,945 WARNING London: Could not retrieve weather data
+2026-06-01 23:50:50,966 WARNING Paris: Could not retrieve weather data
+2026-06-01 23:50:50,985 WARNING Berlin: Could not retrieve weather data
+2026-06-01 23:50:50,997 WARNING Madrid: Could not retrieve weather data
+2026-06-01 23:50:51,049 WARNING Rome: Could not retrieve weather data
+2026-06-01 23:50:51,080 WARNING Amsterdam: Could not retrieve weather data
+2026-06-01 23:50:51,091 WARNING Moscow: Could not retrieve weather data
+2026-06-01 23:50:51,107 WARNING New York: Could not retrieve weather data
+2026-06-01 23:50:51,121 WARNING Los Angeles: Could not retrieve weather data
+2026-06-01 23:50:51,136 WARNING Chicago: Could not retrieve weather data
+2026-06-01 23:50:51,148 WARNING Toronto: Could not retrieve weather data
+2026-06-01 23:50:51,331 WARNING Vancouver: Could not retrieve weather data
+2026-06-01 23:50:51,344 WARNING Mexico City: Could not retrieve weather data
+2026-06-01 23:50:51,357 WARNING São Paulo: Could not retrieve weather data
+2026-06-01 23:50:51,389 WARNING Rio de Janeiro: Could not retrieve weather data
+2026-06-01 23:50:51,421 WARNING Buenos Aires: Could not retrieve weather data
+2026-06-01 23:50:51,435 WARNING Cairo: Could not retrieve weather data
+2026-06-01 23:50:51,447 WARNING Nairobi: Could not retrieve weather data
+2026-06-01 23:50:51,459 WARNING Cape Town: Could not retrieve weather data
+2026-06-01 23:50:51,483 WARNING Lagos: Could not retrieve weather data
+2026-06-01 23:50:51,501 WARNING Sydney: Could not retrieve weather data
+2026-06-01 23:50:51,531 WARNING Melbourne: Could not retrieve weather data
+2026-06-01 23:50:51,542 WARNING Auckland: Could not retrieve weather data
+2026-06-01 23:50:51,543 INFO Cycle done — 18 OK, 32 failed
