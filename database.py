@@ -1,5 +1,5 @@
 import json, os, sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 import mysql.connector
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,11 +8,12 @@ load_dotenv()
 try:
     from pymongo import MongoClient
     _mongo_client = MongoClient(os.getenv("MONGO_URI","mongodb://localhost:27017/"),
-                                serverSelectionTimeoutMS=2000)
+                                serverSelectionTimeoutMS=1000)
+    _mongo_client.admin.command("ping")
     _mongo_db     = _mongo_client["weather_text"]
     _MONGO_OK     = True
     print("[DB] MongoDB connected")
-except Exception as _e:
+except Exception:
     _MONGO_OK = False
 
 
@@ -248,7 +249,7 @@ def save_analysis(city, weather_data, img_res, text_res, analysis,
         VALUES ({P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},
                 {P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P},{P})
     """, (
-        city, datetime.utcnow(),
+        city, datetime.now(timezone.utc),
         weather_data["main"]["temp"],
         weather_data["weather"][0]["description"],
         img_res.get("cloud", 0),
@@ -284,7 +285,7 @@ def save_analysis(city, weather_data, img_res, text_res, analysis,
         try:
             _mongo_db.text_docs.insert_one({
                 "record_id": record_id, "city": city,
-                "timestamp": datetime.utcnow(), "titles": raw_titles,
+                "timestamp": datetime.now(timezone.utc), "titles": raw_titles,
             })
         except Exception as e:
             print(f"[DB] Mongo write error: {e}")
@@ -437,8 +438,12 @@ def migrate_sqlite_to_mysql(sqlite_path="weather_data.db"):
             (city, timestamp, temperature, description,
              cloud_score, heat_score,
              text_rain, text_heat, text_wind, text_snow, text_haze,
-             analysis, raw_weather)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+             analysis, raw_weather,
+             cloud_img_path, thermal_img_path, text_raw,
+             lat, lon, feature_vector,
+             fc_temp, fc_humidity, fc_wind, fc_rain,
+             nwp_data, radar_data, elevation, land_use)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             r["city"], r["timestamp"], r.get("temperature"),
             r.get("description"),
@@ -446,6 +451,10 @@ def migrate_sqlite_to_mysql(sqlite_path="weather_data.db"):
             r.get("text_rain"), r.get("text_heat"),
             r.get("text_wind"), r.get("text_snow"), r.get("text_haze"),
             r.get("analysis"),  r.get("raw_weather"),
+            r.get("cloud_img_path"), r.get("thermal_img_path"), r.get("text_raw"),
+            r.get("lat"), r.get("lon"), r.get("feature_vector"),
+            r.get("fc_temp"), r.get("fc_humidity"), r.get("fc_wind"), r.get("fc_rain"),
+            r.get("nwp_data"), r.get("radar_data"), r.get("elevation"), r.get("land_use"),
         ))
         dst.commit()
         id_map[r["id"]] = dst_cur.lastrowid
@@ -521,7 +530,10 @@ CITY_CLIMATE = {
 
 def get_city_thresholds(city):
     """Return (heat_thresh, cold_thresh, wind_thresh) for a city."""
-    return CITY_CLIMATE.get(city, CITY_CLIMATE["default"])
+    if not city:
+        return CITY_CLIMATE["default"]
+    normalized = city.strip().title()
+    return CITY_CLIMATE.get(normalized, CITY_CLIMATE.get(city, CITY_CLIMATE["default"]))
 
 
 # ── CLI entry point ───────────────────────────────────────────────────────────

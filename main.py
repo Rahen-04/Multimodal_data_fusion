@@ -26,7 +26,7 @@ import numpy as np
 from io import BytesIO
 import feedparser
 import os, re, json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from database import (init_db, save_analysis, get_history,
                       get_connection, save_labels, get_nearby,
@@ -71,7 +71,8 @@ def save_image(pil_img, prefix):
     if pil_img is None:
         return None
     os.makedirs("data/images", exist_ok=True)
-    path = f"data/images/{prefix}_{datetime.utcnow().timestamp()}.png"
+    ts = datetime.now(timezone.utc).timestamp()
+    path = f"data/images/{prefix}_{ts}.png"
     pil_img.save(path)
     return path
 
@@ -81,9 +82,9 @@ def save_image(pil_img, prefix):
 def get_weather(city):
     """OpenWeatherMap current weather."""
     try:
-        url = (f"https://api.openweathermap.org/data/2.5/weather"
-               f"?q={city}&appid={WEATHER_API_KEY}&units=metric")
-        res = requests.get(url, timeout=10)
+        url = "https://api.openweathermap.org/data/2.5/weather"
+        params = {"q": city.strip(), "appid": WEATHER_API_KEY, "units": "metric"}
+        res = requests.get(url, params=params, timeout=10)
         if res.status_code != 200:
             return {"error": "OWM API failed", "status": res.status_code}
         return res.json()
@@ -128,58 +129,68 @@ def get_news(city):
         return {"articles": []}
 
 
+_COORDS_CACHE = {}
+_ELEV_CACHE   = {}
+_LAND_CACHE   = {}
+
 def get_coordinates(city):
-    """Nominatim geocoding."""
+    """Nominatim geocoding with caching."""
+    c_key = city.strip().lower()
+    if c_key in _COORDS_CACHE:
+        return _COORDS_CACHE[c_key]
     url     = f"https://nominatim.openstreetmap.org/search?q={city}&format=json"
-    headers = {"User-Agent": "multimodal-weather-app"}
+    headers = {"User-Agent": "WeatherFusion-Intelligence/2.0 (contact: support@weatherfusion.local)"}
     try:
         data = requests.get(url, headers=headers, timeout=5).json()
         if data:
-            return float(data[0]["lat"]), float(data[0]["lon"])
+            coords = (float(data[0]["lat"]), float(data[0]["lon"]))
+            _COORDS_CACHE[c_key] = coords
+            return coords
     except Exception as e:
         print(f"[Geocoding] {e}")
     return None, None
 
 
 def get_elevation(lat, lon):
-    """
-    SRTM elevation via open-elevation.com API.
-    Returns metres above sea level (float).
-    """
-    if lat is None:
+    """SRTM elevation via open-elevation.com API with caching."""
+    if lat is None or lon is None:
         return 0.0
+    key = (round(lat, 2), round(lon, 2))
+    if key in _ELEV_CACHE:
+        return _ELEV_CACHE[key]
     try:
         url  = f"https://api.open-elevation.com/api/v1/lookup?locations={lat},{lon}"
         data = requests.get(url, timeout=5).json()
-        return float(data["results"][0]["elevation"])
+        elev = float(data["results"][0]["elevation"])
+        _ELEV_CACHE[key] = elev
+        return elev
     except Exception:
         return 0.0
 
 
 def get_land_use(lat, lon):
-    """
-    Approximate land-use from Nominatim reverse geocoding.
-    Categories: urban, cropland, forest, water, unknown.
-    Production: replace with Copernicus CORINE dataset.
-    """
-    if lat is None:
+    """Approximate land-use from Nominatim reverse geocoding with caching."""
+    if lat is None or lon is None:
         return "unknown"
+    key = (round(lat, 2), round(lon, 2))
+    if key in _LAND_CACHE:
+        return _LAND_CACHE[key]
     try:
-        url     = (f"https://nominatim.openstreetmap.org/reverse"
-                   f"?lat={lat}&lon={lon}&format=json")
-        headers = {"User-Agent": "multimodal-weather-app"}
+        url     = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
+        headers = {"User-Agent": "WeatherFusion-Intelligence/2.0 (contact: support@weatherfusion.local)"}
         data    = requests.get(url, headers=headers, timeout=5).json()
         addr    = data.get("address", {})
-        # coarse classification from address fields
+        land_use = "unknown"
         if any(k in addr for k in ("city", "town", "suburb", "quarter")):
-            return "urban"
-        if "forest" in str(addr).lower() or "wood" in str(addr).lower():
-            return "forest"
-        if any(k in addr for k in ("farm", "village")):
-            return "cropland"
-        if "water" in str(addr).lower() or "lake" in str(addr).lower():
-            return "water"
-        return "unknown"
+            land_use = "urban"
+        elif "forest" in str(addr).lower() or "wood" in str(addr).lower():
+            land_use = "forest"
+        elif any(k in addr for k in ("farm", "village")):
+            land_use = "cropland"
+        elif "water" in str(addr).lower() or "lake" in str(addr).lower():
+            land_use = "water"
+        _LAND_CACHE[key] = land_use
+        return land_use
     except Exception:
         return "unknown"
 
@@ -202,8 +213,9 @@ def get_nwp_data(forecast_6h: dict):
 # ── Satellite imagery (NASA GIBS WMS) ────────────────────────────────────────
 
 def _gibs_image(bbox, layer, fmt, style_param=""):
-    today     = datetime.utcnow().strftime('%Y-%m-%d')
-    yesterday = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d')
+    now_utc   = datetime.now(timezone.utc)
+    today     = now_utc.strftime('%Y-%m-%d')
+    yesterday = (now_utc - timedelta(days=1)).strftime('%Y-%m-%d')
     base = (
         "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?"
         "SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
@@ -424,6 +436,7 @@ def home():
 
 @app.get("/analyze/{city}")
 def analyze(city: str):
+    city = city.strip().title()
     # Step 1 – collect all modalities
     weather_data = get_weather(city)
     if "weather" not in weather_data:
@@ -512,7 +525,7 @@ def analyze(city: str):
                   if attn_preds else {})
 
         analysis[event] = {
-            "detected":     any(detected),
+            "detected":     bool(blended >= 0.50),
             "confidence":   round(blended, 3),
             "horizon":      "6h",
             "model_blend":  {n: round(c, 3) for n, _, c in confs},
@@ -542,7 +555,7 @@ def analyze(city: str):
     # Labels are FUTURE-aligned: based on 6h forecast, not current state
     labels = {k: v for k, v in future_labels.items() if not k.startswith("_")}
     try:
-        save_labels(record_id, city, datetime.utcnow(), labels)
+        save_labels(record_id, city, datetime.now(timezone.utc), labels)
     except Exception as e:
         print("[AutoLabel Error]", e)
 

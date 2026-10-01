@@ -88,6 +88,9 @@ def collect_once():
             print(f"EXCEPTION: {e}")
             logging.error(f"{city}: {e}")
             failed += 1
+        finally:
+            # Respect OpenWeatherMap free-tier rate limit (60 calls/min)
+            time.sleep(1.2)
 
     print(f"[Collector] Done — {success} OK, {failed} failed")
     logging.info(f"Cycle done — {success} OK, {failed} failed")

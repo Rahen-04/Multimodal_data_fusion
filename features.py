@@ -3,13 +3,13 @@ features.py  —  Multimodal Feature Engineering
 Modalities:
   1. Satellite imagery   → ResNet18 CNN embeddings (512-d each, cloud + thermal)
   2. Weather numerics    → OpenWeatherMap fields (6-d)
-  3. Forecast numerics   → next time-step forecast (4-d)
+  3. Forecast numerics   → 6-hour forecast (10-d)
   4. Textual data        → sentence-transformers mean-pool (384-d)
   5. Geospatial          → lat/lon + elevation + land-use (5-d)
   6. Radar               → precipitation intensity proxy (4-d)
   7. NWP model output    → GFS/ECMWF placeholder features (4-d)
 
-Total vector size: 512 + 512 + 6 + 4 + 384 + 5 + 4 + 4 = 1431-d
+Total vector size: 6 + 512 + 512 + 384 + 10 + 5 + 4 + 4 = 1437-d
 """
 
 import numpy as np
@@ -276,4 +276,4 @@ def build_feature_vector(
         geo_feat,
         radar_feat,
         nwp_feat,
-    ])   # (1431,)
+    ])   # (1437,)

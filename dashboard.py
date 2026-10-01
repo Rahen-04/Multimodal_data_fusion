@@ -17,7 +17,8 @@ import json
 import os
 from dotenv import load_dotenv
 load_dotenv()  # load .env so DB_PASSWORD etc are available
-import mysql.connector
+import sys
+from database import get_connection, _ph
 from datetime import datetime
 
 API_BASE = "http://localhost:8000"
@@ -639,13 +640,9 @@ elif page == "Label & Train":
     )
 
     try:
-        conn   = mysql.connector.connect(
-            host=os.getenv("DB_HOST","localhost"),
-            user=os.getenv("DB_USER","root"),
-            password=os.getenv("DB_PASSWORD",""),
-            database=os.getenv("DB_NAME","weather_db"),
-        )
+        conn   = get_connection()
         cursor = conn.cursor()
+        P      = _ph()
         cursor.execute("""
             SELECT r.id, r.city, r.timestamp, r.temperature,
                    r.description, r.cloud_score, r.heat_score,
@@ -685,11 +682,11 @@ elif page == "Label & Train":
 
         if st.button("💾 Save labels", type="primary"):
             try:
-                cursor.executemany("""
+                cursor.executemany(f"""
                     INSERT INTO labeled_events
                     (record_id, city, timestamp,
                      label_rain, label_heat, label_wind, label_snow, label_haze)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                    VALUES ({P},{P},{P},{P},{P},{P},{P},{P})
                 """, label_data)
                 conn.commit()
                 st.success("Labels saved!")
@@ -713,7 +710,7 @@ elif page == "Label & Train":
             def run_training():
                 try:
                     proc = subprocess.Popen(
-                        ["python", "train_model.py"],
+                        [sys.executable, "train_model.py"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
                         text=True,

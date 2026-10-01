@@ -8,7 +8,7 @@ from sklearn.ensemble import (RandomForestClassifier,
                                VotingClassifier)
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import (classification_report, roc_auc_score, f1_score)
@@ -187,12 +187,12 @@ def build_late_fusion_ensemble(X_train, y_train, city_weights_train):
     n_comp = min(50, X_train.shape[0] - 1, X_train.shape[1])
     sw     = _combined_weights(y_train, city_weights_train)
 
-    rf = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_comp)),
+    rf = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
                    ("clf", RandomForestClassifier(
-                       100, class_weight="balanced", random_state=0))])
-    gb = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_comp)),
-                   ("clf", GradientBoostingClassifier(100, random_state=0))])
-    lr = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_comp)),
+                       n_estimators=100, class_weight="balanced", random_state=0))])
+    gb = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
+                   ("clf", GradientBoostingClassifier(n_estimators=100, random_state=0))])
+    lr = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
                    ("clf", LogisticRegression(
                        class_weight="balanced", max_iter=500, random_state=0))])
 
@@ -207,10 +207,11 @@ def build_late_fusion_ensemble(X_train, y_train, city_weights_train):
         estimators=[("rf", rf), ("gb", gb), ("lr", lr)],
         voting="soft",
     )
-    # VotingClassifier with pre-fitted estimators: fit a dummy pass
-    ensemble.estimators_ = [rf, gb, lr]
-    ensemble.le_         = None
-    ensemble.classes_    = np.array([0, 1])
+    # VotingClassifier with pre-fitted estimators
+    ensemble.estimators_       = [rf, gb, lr]
+    ensemble.named_estimators_ = {"rf": rf, "gb": gb, "lr": lr}
+    ensemble.le_               = LabelEncoder().fit(np.array([0, 1]))
+    ensemble.classes_          = np.array([0, 1])
     return ensemble
 
 
@@ -376,7 +377,7 @@ def train_and_evaluate():
 
         results[event] = {
             "f1":         chosen_f1,
-            "auc":        float(auc) if auc else None,
+            "auc":        float(auc) if (auc is not None and not np.isnan(auc)) else None,
             "model_type": chosen_type,
         }
 

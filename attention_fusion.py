@@ -38,17 +38,23 @@ MODALITY_NAMES = list(MODALITY_DIMS.keys())
 TOTAL_DIM      = sum(MODALITY_DIMS.values())   # 1437
 
 
-def split_modalities(X: "np.ndarray") -> dict:
+def split_modalities(X) -> dict:
     """
     Split a flat 1437-d feature vector back into per-modality blocks.
-    Returns dict {modality_name: tensor (batch, dim)}.
+    Accepts torch.Tensor or numpy.ndarray. If already a dict, returns as-is.
     """
     if not _TORCH_OK:
         return {}
+    if isinstance(X, dict):
+        return X
 
     splits, idx = {}, 0
+    is_tensor = isinstance(X, torch.Tensor)
     for name, dim in MODALITY_DIMS.items():
-        splits[name] = torch.tensor(X[:, idx:idx+dim], dtype=torch.float32)
+        if is_tensor:
+            splits[name] = X[:, idx:idx+dim]
+        else:
+            splits[name] = torch.tensor(X[:, idx:idx+dim], dtype=torch.float32)
         idx += dim
     return splits
 
@@ -163,6 +169,19 @@ class CrossModalAttentionFusion(nn.Module):
         fused = x.mean(dim=1)                           # (B, hidden_dim)
         return self.output_proj(fused)                  # (B, fused_dim)
 
+    def get_attention_weights(self, modality_dict: dict):
+        """Return cross-modal attention weights for interpretability."""
+        device = next(self.parameters()).device
+        modality_dict = {k: v.to(device) for k, v in modality_dict.items()}
+        projected = torch.stack([
+            torch.relu(self.projections[name](modality_dict[name]))
+            for name in MODALITY_NAMES
+        ], dim=1)                                       # (B, n_mod, hidden_dim)
+        _, weights = self.cross_attn(projected, projected, projected, average_attn_weights=True)
+        # weights: (B, n_mod, n_mod) — mean over query dimension gives importance per modality
+        summary = weights.mean(dim=1).detach().cpu().numpy()
+        return {name: summary[:, i] for i, name in enumerate(MODALITY_NAMES)}
+
 
 class CNNLSTMAttentionModel(nn.Module):
     """
@@ -210,8 +229,7 @@ class CNNLSTMAttentionModel(nn.Module):
         x_flat: (batch, 1437) — flat feature vector
         Returns: (batch, 1) probability
         """
-        mods   = split_modalities(x_flat.detach().cpu().numpy()
-                                  if not isinstance(x_flat, dict) else x_flat)
+        mods   = split_modalities(x_flat)
         # Move modalities to same device as model
         device = next(self.parameters()).device
         mods   = {k: v.to(device) for k, v in mods.items()}
@@ -253,18 +271,25 @@ def train_attention_model(X, y, event, epochs=30, hidden=128, fused_dim=256):
     loader  = DataLoader(TensorDataset(Xt, yt), batch_size=32, shuffle=False)
     model   = CNNLSTMAttentionModel(hidden=hidden, fused_dim=fused_dim)
     opt     = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=1e-5)
-    loss_fn = torch.nn.BCELoss()
+
+    pos_count = float(sum(y[:split]))
+    neg_count = float(len(y[:split]) - pos_count)
+    pos_weight = neg_count / max(pos_count, 1.0)
 
     model.train()
     for ep in range(epochs):
         for xb, yb in loader:
             opt.zero_grad()
-            loss_fn(model(xb), yb).backward()
+            weights = torch.where(yb == 1.0, torch.tensor(pos_weight, dtype=torch.float32), torch.tensor(1.0, dtype=torch.float32))
+            preds_prob = model(xb)
+            loss = F.binary_cross_entropy(preds_prob, yb, weight=weights)
+            loss.backward()
             opt.step()
         if (ep + 1) % 10 == 0:
             model.eval()
             with torch.no_grad():
-                probs = model(Xv).squeeze().numpy()
+                probs = model(Xv).squeeze().detach().cpu().numpy()
+            probs = np.atleast_1d(probs)
             preds = (probs > 0.5).astype(int)
             f1 = sk_f1(yv, preds, zero_division=0)
             print(f"  [Attention/{event}] Epoch {ep+1}/{epochs} — val F1={f1:.3f}")
@@ -272,7 +297,8 @@ def train_attention_model(X, y, event, epochs=30, hidden=128, fused_dim=256):
 
     model.eval()
     with torch.no_grad():
-        probs = model(Xv).squeeze().numpy()
+        probs = model(Xv).squeeze().detach().cpu().numpy()
+    probs  = np.atleast_1d(probs)
     preds  = (probs > 0.5).astype(int)
     val_f1 = sk_f1(yv, preds, zero_division=0)
 

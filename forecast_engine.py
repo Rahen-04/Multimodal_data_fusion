@@ -80,14 +80,15 @@ def get_forecast_6h(lat: float, lon: float,
         url  = (f"https://api.openweathermap.org/data/2.5/forecast"
                 f"?lat={lat}&lon={lon}&appid={owm_key}&units=metric")
         data = requests.get(url, timeout=8).json()
-        # bucket index 2 = +6h  (each bucket = 3h)
-        fc   = data["list"][2] if len(data.get("list", [])) > 2 else data["list"][0]
-
-        # Only override if Open-Meteo gave us zeros
-        if result["rain"] == 0.0:
-            result["rain"] = fc.get("rain", {}).get("3h", 0.0)
-        if result["wind"] == 0.0:
-            result["wind"] = fc["wind"]["speed"]
+        fc_list = data.get("list", [])
+        if fc_list:
+            # bucket index 2 = +6h  (each bucket = 3h)
+            fc = fc_list[2] if len(fc_list) > 2 else fc_list[0]
+            # Only override if Open-Meteo gave us zeros
+            if result["rain"] == 0.0:
+                result["rain"] = fc.get("rain", {}).get("3h", 0.0)
+            if result["wind"] == 0.0:
+                result["wind"] = fc.get("wind", {}).get("speed", 0.0)
 
     except Exception as e:
         print(f"[Forecast] OWM /forecast failed: {e}")
@@ -188,10 +189,11 @@ def generate_future_labels(forecast_6h: dict,
     )
 
     # ── Snow ─────────────────────────────────────────────────────────────
+    # Snow requires cold temperature AND precipitation/moisture, or explicit snow codes
     label_snow = int(
         fc_snow  > 0.5              or
-        fc_temp  < cold_thresh      or
-        fc_code  in _SNOW_CODES
+        fc_code  in _SNOW_CODES     or
+        (fc_temp < cold_thresh and (fc_snow > 0.0 or fc_rain > 0.5 or fc_precip_p > 0.3))
     )
 
     # ── Haze ─────────────────────────────────────────────────────────────
@@ -213,7 +215,7 @@ def generate_future_labels(forecast_6h: dict,
             "rain": min(fc_precip_p + fc_rain/20.0 + fc_cape/3000.0, 1.0),
             "heat": min(max(fc_temp - heat_thresh + 5, 0) / 10.0,    1.0),
             "wind": min(max(fc_wind - wind_thresh + 5, 0) / 15.0,    1.0),
-            "snow": min(fc_snow / 5.0 + max(cold_thresh - fc_temp, 0) / 10.0, 1.0),
+            "snow": min(fc_snow / 5.0 + (max(cold_thresh - fc_temp, 0) / 10.0 if (fc_snow > 0 or fc_rain > 0 or fc_code in _SNOW_CODES) else 0.0), 1.0),
             "haze": 0.6 if label_haze else 0.1,
         }
     }

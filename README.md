@@ -110,16 +110,26 @@ Request: /analyze/{city}
   "city": "Mumbai",
   "weather": "moderate rain",
   "temperature": 28.4,
+  "prediction_horizon": "6h",
+  "forecast_summary": {
+    "temp_6h": 27.8,
+    "rain_6h_mm": 4.2,
+    "wind_6h_ms": 5.1,
+    "precip_prob": 0.75,
+    "cape": 1200
+  },
   "analysis": {
     "rain": {
       "detected": true,
       "confidence": 0.84,
-      "sources": { "weather": true, "text": true, "image": true }
+      "horizon": "6h",
+      "model_blend": { "sklearn": 0.82, "lstm": 0.86, "attn": 0.88, "rules": 0.80 },
+      "attn_weights": { "weather": 0.14, "radar": 0.22, "cloud": 0.18, "forecast": 0.19 }
     },
-    "heat": { "detected": false, "confidence": 0.10 },
-    "wind": { "detected": false, "confidence": 0.22 }
+    "heat": { "detected": false, "confidence": 0.12 },
+    "wind": { "detected": false, "confidence": 0.25 }
   },
-  "model": "ml"
+  "model": "sklearn+lstm+attention"
 }
 ```
 
