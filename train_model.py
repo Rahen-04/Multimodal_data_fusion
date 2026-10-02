@@ -46,7 +46,11 @@ def load_dataset():
         feat = feat[:FEATURE_DIM]   # truncate if somehow longer
 
         X.append(feat)
-        city_labels.append(r.get("city", "unknown"))
+        city_raw = r.get("city", "unknown")
+        city_clean = city_raw.strip().title() if isinstance(city_raw, str) else "Unknown"
+        if city_clean in ("Bengaluru", "Bangalore"):
+            city_clean = "Bengaluru"
+        city_labels.append(city_clean)
         for event in EVENTS:
             Y[event].append(r[f"label_{event}"])
 
@@ -112,9 +116,9 @@ def build_best_pipeline(X_train, y_train, city_weights_train):
                 ("pca",    PCA(n_components=n_comp)),
                 ("clf",    RandomForestClassifier(
                                n_estimators=200, max_depth=10,
-                               class_weight="balanced", random_state=42)),
+                               random_state=42)),
             ]),
-            None,   # RF handles class_weight natively
+            sw_combined,
         ),
         "gradient_boost": (
             Pipeline([
@@ -124,26 +128,26 @@ def build_best_pipeline(X_train, y_train, city_weights_train):
                                n_estimators=150, max_depth=4,
                                learning_rate=0.08, random_state=42)),
             ]),
-            sw_combined,   # FIX 2: pass combined weights to GBT
+            sw_combined,
         ),
         "logistic": (
             Pipeline([
                 ("scaler", StandardScaler()),
                 ("pca",    PCA(n_components=n_comp)),
                 ("clf",    LogisticRegression(
-                               class_weight="balanced", max_iter=600,
+                               max_iter=600,
                                C=1.0, random_state=42)),
             ]),
-            None,
+            sw_combined,
         ),
         "svm": (
             Pipeline([
                 ("scaler", StandardScaler()),
                 ("pca",    PCA(n_components=n_comp)),
-                ("clf",    SVC(kernel="rbf", class_weight="balanced",
+                ("clf",    SVC(kernel="rbf",
                                probability=True, random_state=42)),
             ]),
-            None,
+            sw_combined,
         ),
     }
 
@@ -152,19 +156,25 @@ def build_best_pipeline(X_train, y_train, city_weights_train):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         for name, (pipe, sw) in candidates.items():
-            fit_params = {}
+            cv_params = {}
             if sw is not None:
-                fit_params["clf__sample_weight"] = sw
+                cv_params = {"params": {"clf__sample_weight": sw}}
 
-            # CV scoring (sample_weight not passed to CV scorer — intentional;
-            # the weight is for training fairness, not metric weighting)
+            # CV scoring with sample weights passed to training folds
             try:
                 scores = cross_val_score(
                     pipe, X_train, y_train,
                     cv=tscv, scoring="f1", error_score=0,
+                    **cv_params
                 )
             except Exception:
-                scores = np.array([0.0])
+                try:
+                    scores = cross_val_score(
+                        pipe, X_train, y_train,
+                        cv=tscv, scoring="f1", error_score=0,
+                    )
+                except Exception:
+                    scores = np.array([0.0])
 
             mean_score = scores.mean()
             print(f"  [{name}] TimeSeriesCV F1 = {mean_score:.3f}")
@@ -182,26 +192,25 @@ def build_best_pipeline(X_train, y_train, city_weights_train):
 def build_late_fusion_ensemble(X_train, y_train, city_weights_train):
     """
     Late fusion: RF + GBT + LR trained independently, soft-voted.
-    GBT gets combined sample_weight, others use class_weight="balanced".
+    All models receive combined sample_weight (city + class balanced).
     """
     n_comp = min(50, X_train.shape[0] - 1, X_train.shape[1])
     sw     = _combined_weights(y_train, city_weights_train)
 
     rf = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
                    ("clf", RandomForestClassifier(
-                       n_estimators=100, class_weight="balanced", random_state=0))])
+                       n_estimators=100, random_state=0))])
     gb = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
                    ("clf", GradientBoostingClassifier(n_estimators=100, random_state=0))])
     lr = Pipeline([("sc", StandardScaler()), ("pca", PCA(n_components=n_comp)),
                    ("clf", LogisticRegression(
-                       class_weight="balanced", max_iter=500, random_state=0))])
+                       max_iter=500, random_state=0))])
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        rf.fit(X_train, y_train)
-        gb.fit(X_train, y_train,
-               clf__sample_weight=sw)   # FIX 2 for GBT in ensemble too
-        lr.fit(X_train, y_train)
+        rf.fit(X_train, y_train, clf__sample_weight=sw)
+        gb.fit(X_train, y_train, clf__sample_weight=sw)
+        lr.fit(X_train, y_train, clf__sample_weight=sw)
 
     ensemble = VotingClassifier(
         estimators=[("rf", rf), ("gb", gb), ("lr", lr)],
@@ -236,9 +245,10 @@ def build_lstm_sequence_model(input_dim, hidden=128, layers=2):
         return None
 
 
-def train_lstm(X, Y, seq_len=5, epochs=20):
+def train_lstm(X, Y, city_weights=None, seq_len=5, epochs=20):
     try:
         import torch, torch.nn as nn
+        import torch.nn.functional as F
         from torch.utils.data import TensorDataset, DataLoader
     except ImportError:
         print("[LSTM] PyTorch not available — skipping")
@@ -251,6 +261,7 @@ def train_lstm(X, Y, seq_len=5, epochs=20):
 
     Xs    = np.array([X[i:i+seq_len] for i in range(n - seq_len)])
     split = int(len(Xs) * 0.8)
+    sws   = city_weights[seq_len:] if city_weights is not None else None
 
     for event in EVENTS:
         y = Y[event]
@@ -267,15 +278,26 @@ def train_lstm(X, Y, seq_len=5, epochs=20):
         Xv = torch.tensor(Xs[split:], dtype=torch.float32)
         yv_np = ys[split:]
 
-        loader  = DataLoader(TensorDataset(Xt, yt), batch_size=32, shuffle=False)
+        if sws is not None:
+            swt = torch.tensor(sws[:split], dtype=torch.float32).unsqueeze(1)
+            dataset = TensorDataset(Xt, yt, swt)
+        else:
+            dataset = TensorDataset(Xt, yt)
+
+        loader  = DataLoader(dataset, batch_size=32, shuffle=False)
         opt     = torch.optim.Adam(model.parameters(), lr=1e-3)
-        loss_fn = nn.BCELoss()
 
         for ep in range(epochs):
             model.train()
-            for xb, yb in loader:
+            for batch in loader:
+                if sws is not None:
+                    xb, yb, swb = batch
+                else:
+                    xb, yb = batch
+                    swb = 1.0
                 opt.zero_grad()
-                loss_fn(model(xb), yb).backward()
+                loss = F.binary_cross_entropy(model(xb), yb, weight=swb if isinstance(swb, torch.Tensor) else None)
+                loss.backward()
                 opt.step()
 
         model.eval()
@@ -393,7 +415,7 @@ def train_and_evaluate():
 
     # (a) LSTM sequence model
     try:
-        train_lstm(X, Y)
+        train_lstm(X, Y, city_weights=city_weights)
     except Exception as e:
         print(f"[LSTM] Skipped: {e}")
 
@@ -406,7 +428,7 @@ def train_and_evaluate():
         if len(set(y)) < 2:
             continue
         try:
-            val_f1 = train_attention_model(X, y, event, epochs=30)
+            val_f1 = train_attention_model(X, y, event, sample_weights=city_weights, epochs=30)
             if val_f1 is not None:
                 attn_results[event] = {"attn_f1": round(val_f1, 3)}
                 results[event]["attn_f1"] = round(val_f1, 3)

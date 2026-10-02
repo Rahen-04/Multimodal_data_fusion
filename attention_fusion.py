@@ -243,7 +243,7 @@ class CNNLSTMAttentionModel(nn.Module):
 
 # ── Training helper ───────────────────────────────────────────────────────────
 
-def train_attention_model(X, y, event, epochs=30, hidden=128, fused_dim=256):
+def train_attention_model(X, y, event, sample_weights=None, epochs=30, hidden=128, fused_dim=256):
     """
     Train CNNLSTMAttentionModel for one event.
     Saves to models/attn_{event}.pt
@@ -268,7 +268,13 @@ def train_attention_model(X, y, event, epochs=30, hidden=128, fused_dim=256):
     Xv = torch.tensor(X[split:], dtype=torch.float32)
     yv = y[split:]
 
-    loader  = DataLoader(TensorDataset(Xt, yt), batch_size=32, shuffle=False)
+    if sample_weights is not None:
+        swt = torch.tensor(sample_weights[:split], dtype=torch.float32).unsqueeze(1)
+        dataset = TensorDataset(Xt, yt, swt)
+    else:
+        dataset = TensorDataset(Xt, yt)
+
+    loader  = DataLoader(dataset, batch_size=32, shuffle=False)
     model   = CNNLSTMAttentionModel(hidden=hidden, fused_dim=fused_dim)
     opt     = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=1e-5)
 
@@ -278,9 +284,15 @@ def train_attention_model(X, y, event, epochs=30, hidden=128, fused_dim=256):
 
     model.train()
     for ep in range(epochs):
-        for xb, yb in loader:
+        for batch in loader:
+            if sample_weights is not None:
+                xb, yb, swb = batch
+            else:
+                xb, yb = batch
+                swb = 1.0
             opt.zero_grad()
-            weights = torch.where(yb == 1.0, torch.tensor(pos_weight, dtype=torch.float32), torch.tensor(1.0, dtype=torch.float32))
+            class_weights = torch.where(yb == 1.0, torch.tensor(pos_weight, dtype=torch.float32), torch.tensor(1.0, dtype=torch.float32))
+            weights = class_weights * (swb if isinstance(swb, torch.Tensor) else 1.0)
             preds_prob = model(xb)
             loss = F.binary_cross_entropy(preds_prob, yb, weight=weights)
             loss.backward()
