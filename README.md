@@ -97,12 +97,14 @@ Request: /analyze/{city}
 
 | Endpoint | Description |
 |---|---|
+| `GET /` | Service health status and metadata |
 | `GET /analyze/{city}` | Full multimodal analysis + 6h forecast |
 | `GET /history/{city}` | Past analysis records for a city |
 | `GET /nearby?lat=&lon=` | Analysis records within 1° radius |
 | `GET /compare?cities=X&cities=Y` | Side-by-side comparison (up to 5 cities) |
 | `GET /evaluate` | ML model evaluation metrics from last training run |
-| `POST /reload-models` | Hot-reload trained ML models without restarting |
+| `GET /shap/{event}` | Mean absolute SHAP feature importances for a hazard event |
+| `POST /reload-models` | Hot-reload trained ML models without restarting the server |
 
 ### Example Response
 ```json
