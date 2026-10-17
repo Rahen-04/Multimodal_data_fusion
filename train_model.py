@@ -315,21 +315,44 @@ def train_lstm(X, Y, city_weights=None, seq_len=5, epochs=20):
 
 # SHAP explainability
 
-def compute_shap_importances(pipe, X_train, event):
+def compute_shap_importances(pipe_or_model, X_train, event):
     try:
         import shap
+        if hasattr(pipe_or_model, "estimators_") and len(pipe_or_model.estimators_) > 0:
+            pipe = pipe_or_model.estimators_[0]
+        else:
+            pipe = pipe_or_model
+
+        if not hasattr(pipe, "named_steps"):
+            return
+
         clf = pipe.named_steps["clf"]
         X_t = pipe[:-1].transform(X_train)
-        explainer   = shap.TreeExplainer(clf)
-        shap_values = explainer.shap_values(X_t[:100])
+        sample = X_t[:100]
+
+        cname = type(clf).__name__.lower()
+        if "forest" in cname or "boosting" in cname:
+            explainer = shap.TreeExplainer(clf)
+            shap_values = explainer.shap_values(sample)
+        elif "logistic" in cname or "linear" in cname:
+            explainer = shap.LinearExplainer(clf, sample)
+            shap_values = explainer.shap_values(sample)
+        else:
+            explainer = shap.KernelExplainer(clf.predict_proba, shap.kmeans(sample, 5))
+            shap_values = explainer.shap_values(sample[:20])
+
         if isinstance(shap_values, list):
             shap_values = shap_values[1]
+        elif isinstance(shap_values, np.ndarray) and shap_values.ndim == 3:
+            shap_values = shap_values[:, :, 1]
+
         mean_abs = np.abs(shap_values).mean(axis=0).tolist()
+        os.makedirs("models", exist_ok=True)
         with open(f"models/shap_{event}.json", "w") as f:
             json.dump({"mean_abs_shap": mean_abs}, f)
         print(f"  [SHAP] Saved → models/shap_{event}.json")
     except Exception as e:
-        print(f"  [SHAP] Skipped: {e}")
+        print(f"  [SHAP] Skipped for {event}: {e}")
 
 
 # Main training routine
