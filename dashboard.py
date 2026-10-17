@@ -119,7 +119,7 @@ with st.sidebar:
 @st.cache_data(ttl=300)
 def fetch_analysis(city):
     try:
-        r    = requests.get(f"{API_BASE}/analyze/{city}", timeout=60)
+        r    = requests.get(f"{API_BASE}/analyze/{city}", timeout=120)
         data = r.json()
         return {"error": f"{city}: {data['error']}"} if "error" in data else data
     except Exception as e:

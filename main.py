@@ -38,6 +38,7 @@ from features  import (
     pixel_cloud_score, pixel_heat_score,
     extract_weather_features, extract_text_features,
     build_feature_vector,
+    _load_vision_model, _load_text_model,
 )
 from train_model import (load_models, predict_with_models,
                           load_lstm_models, predict_with_lstm)
@@ -63,6 +64,10 @@ if loaded:
     print(f"[API] Models loaded: {', '.join(loaded)}")
 else:
     print("[API] No trained models — using rule-based fallback")
+
+# Pre-warm vision and text models at startup to eliminate cold-start inference latency
+_load_vision_model()
+_load_text_model()
 
 
 # ── Utility ───────────────────────────────────────────────────────────────────
@@ -106,13 +111,13 @@ def get_forecast(lat, lon):
 
 def get_news(city):
     """Google News RSS → article titles + optional image URLs.
-    Returns empty list on network failure (Google throttles RSS requests).
+    Returns empty list on network failure or timeout (Google throttles RSS requests).
     """
     try:
-        url  = (f"https://news.google.com/rss/search"
-                f"?q={city}+weather&hl=en-IN&gl=IN&ceid=IN:en")
-        feed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"},
-                                handlers=[])
+        url = (f"https://news.google.com/rss/search"
+               f"?q={city}+weather&hl=en-IN&gl=IN&ceid=IN:en")
+        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+        feed = feedparser.parse(res.content)
         articles = []
         for entry in getattr(feed, "entries", [])[:5]:
             try:
@@ -269,7 +274,7 @@ def _gibs_image(bbox, layer, fmt, style_param=""):
     )
     for date in [today, yesterday]:
         try:
-            res = requests.get(f"{base}&TIME={date}", timeout=10)
+            res = requests.get(f"{base}&TIME={date}", timeout=4)
             if res.status_code == 200 and b"ServiceException" not in res.content:
                 return Image.open(BytesIO(res.content)), f"{base}&TIME={date}"
         except Exception:
