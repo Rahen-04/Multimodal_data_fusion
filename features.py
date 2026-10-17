@@ -77,6 +77,9 @@ def pixel_cloud_score(pil_image: Optional[Image.Image]) -> float:
         return 0.0
     img = pil_image.resize((224, 224))
     arr = np.array(img) / 255.0
+    # Guard against pitch-black nighttime optical satellite captures
+    if float(arr.mean()) < 0.03:
+        return 0.0
     r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
     cloud_mask = np.logical_and.reduce((
         r > 0.7, g > 0.7, b > 0.7,

@@ -101,3 +101,24 @@ def test_future_label_generation_heat():
     labels = generate_future_labels(mock_heat_forecast, city="Delhi", city_thresholds=(42.0, 8.0, 15.0))
     assert labels["heat"] == 1
     assert labels["rain"] == 0
+
+
+def test_offline_coordinate_cache():
+    from main import get_coordinates
+    # Verify cached 50-city coordinates return valid tuples without network
+    mumbai_coords = get_coordinates("Mumbai")
+    assert mumbai_coords == (19.0760, 72.8777)
+    tokyo_coords = get_coordinates("Tokyo")
+    assert tokyo_coords == (35.6762, 139.6503)
+
+
+def test_lstm_prediction_with_history():
+    from train_model import predict_with_lstm, build_lstm_sequence_model
+    dummy_model = build_lstm_sequence_model(input_dim=1437)
+    models = {"rain": dummy_model}
+    cur_x = np.ones((1, 1437), dtype=np.float32)
+    history = [np.zeros((1437,), dtype=np.float32) for _ in range(3)]
+    res = predict_with_lstm(models, cur_x, seq_len=5, history_vectors=history)
+    assert "rain" in res
+    assert "confidence" in res["rain"]
+    assert 0.0 <= res["rain"]["confidence"] <= 1.0

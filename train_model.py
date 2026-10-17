@@ -17,8 +17,11 @@ from sklearn.utils.class_weight import compute_sample_weight
 from attention_fusion import (train_attention_model, load_attention_models,
                               predict_attention)
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8",
-                               errors="replace")
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 os.makedirs("models", exist_ok=True)
 
@@ -480,14 +483,24 @@ def load_lstm_models():
 
 
 def predict_with_lstm(lstm_models: dict, X: "np.ndarray",
-                      seq_len: int = 5) -> dict:
+                      seq_len: int = 5, history_vectors: list = None) -> dict:
     try:
         import torch
     except ImportError:
         return {}
     results = {}
-    # Repeat single sample to build a minimal sequence
-    X_seq = np.repeat(X, seq_len, axis=0)          # (seq_len, features)
+    
+    # Construct sequence from history if available, else pad/repeat
+    cur = X if X.ndim == 2 else X.reshape(1, -1)
+    if history_vectors and len(history_vectors) > 0:
+        recent = [np.array(v, dtype=np.float32) for v in history_vectors[-(seq_len - 1):]]
+        full_seq = recent + [cur[0]]
+        while len(full_seq) < seq_len:
+            full_seq.insert(0, full_seq[0])
+        X_seq = np.array(full_seq, dtype=np.float32)
+    else:
+        X_seq = np.repeat(cur, seq_len, axis=0)          # (seq_len, features)
+
     X_seq = torch.tensor(X_seq, dtype=torch.float32).unsqueeze(0)  # (1, seq_len, features)
     for event, model in lstm_models.items():
         with torch.no_grad():

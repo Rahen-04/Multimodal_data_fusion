@@ -129,12 +129,56 @@ def get_news(city):
         return {"articles": []}
 
 
-_COORDS_CACHE = {}
+_PRESET_COORDS = {
+    # India
+    "mumbai": (19.0760, 72.8777), "delhi": (28.6139, 77.2090),
+    "bangalore": (12.9716, 77.5946), "bengaluru": (12.9716, 77.5946),
+    "kolkata": (22.5726, 88.3639), "chennai": (13.0827, 80.2707),
+    "hyderabad": (17.3850, 78.4867), "pune": (18.5204, 73.8567),
+    "ahmedabad": (23.0225, 72.5714), "jaipur": (26.9124, 75.7873),
+    "lucknow": (26.8467, 80.9462), "bhopal": (23.2599, 77.4126),
+    "patna": (25.5941, 85.1376), "raipur": (21.2514, 81.6296),
+    "korba": (22.3595, 82.7501), "chandigarh": (30.7333, 76.7794),
+    "srinagar": (34.0837, 74.7973), "guwahati": (26.1445, 91.7362),
+    "thiruvananthapuram": (8.5241, 76.9366), "goa": (15.2993, 74.1240),
+
+    # Asia
+    "tokyo": (35.6762, 139.6503), "beijing": (39.9042, 116.4074),
+    "shanghai": (31.2304, 121.4737), "seoul": (37.5665, 126.9780),
+    "bangkok": (13.7563, 100.5018), "singapore": (1.3521, 103.8198),
+    "dubai": (25.2048, 55.2708), "jakarta": (-6.2088, 106.8456),
+    "kuala lumpur": (3.1390, 101.6869),
+
+    # Europe
+    "london": (51.5074, -0.1278), "paris": (48.8566, 2.3522),
+    "berlin": (52.5200, 13.4050), "madrid": (40.4168, -3.7038),
+    "rome": (41.9028, 12.4964), "amsterdam": (52.3676, 4.9041),
+    "moscow": (55.7558, 37.6173),
+
+    # North America
+    "new york": (40.7128, -74.0060), "los angeles": (34.0522, -118.2437),
+    "chicago": (41.8781, -87.6298), "toronto": (43.6532, -79.3832),
+    "vancouver": (49.2827, -123.1207), "mexico city": (19.4326, -99.1332),
+
+    # South America
+    "são paulo": (-23.5505, -46.6333), "sao paulo": (-23.5505, -46.6333),
+    "rio de janeiro": (-22.9068, -43.1729), "buenos aires": (-34.6037, -58.3816),
+
+    # Africa
+    "cairo": (30.0444, 31.2357), "nairobi": (-1.2921, 36.8219),
+    "cape town": (-33.9249, 18.4241), "lagos": (6.5244, 3.3792),
+
+    # Oceania
+    "sydney": (-33.8688, 151.2093), "melbourne": (-37.8136, 144.9631),
+    "auckland": (-36.8485, 174.7633),
+}
+
+_COORDS_CACHE = dict(_PRESET_COORDS)
 _ELEV_CACHE   = {}
 _LAND_CACHE   = {}
 
 def get_coordinates(city):
-    """Nominatim geocoding with caching."""
+    """Geocoding with offline preset cache and Nominatim fallback."""
     c_key = city.strip().lower()
     if c_key in _COORDS_CACHE:
         return _COORDS_CACHE[c_key]
@@ -488,35 +532,68 @@ def analyze(city: str):
     features_reshaped = features.reshape(1, -1)
 
     # Sklearn (RF / GBT / SVM / late-fusion)
-    ml_preds   = predict_with_models(_ml_models, features_reshaped) if _ml_models else {}
-    # LSTM sequence model
-    lstm_preds = predict_with_lstm(_lstm_models, features_reshaped)  if _lstm_models else {}
+    ml_preds = predict_with_models(_ml_models, features_reshaped) if _ml_models else {}
+
+    # LSTM sequence model: build real historical trajectory from past database records
+    recent_records = get_history(city, limit=4)
+    history_feats = []
+    if recent_records:
+        for rec in reversed(recent_records):
+            if rec.get("feature_vector"):
+                try:
+                    fv = json.loads(rec["feature_vector"])
+                    if len(fv) == len(feature_vector):
+                        history_feats.append(fv)
+                except Exception:
+                    pass
+    lstm_preds = predict_with_lstm(_lstm_models, features_reshaped, history_vectors=history_feats) if _lstm_models else {}
+
     # CNN+LSTM+Attention hybrid
-    attn_preds = predict_attention(_attn_models, features_reshaped)  if _attn_models else {}
+    attn_preds = predict_attention(_attn_models, features_reshaped) if _attn_models else {}
 
     any_deep = bool(ml_preds or lstm_preds or attn_preds)
+
+    # Load validation results to calibrate ensemble voting weights dynamically
+    eval_f1_cache = {}
+    if os.path.exists("models/eval_results.json"):
+        try:
+            with open("models/eval_results.json") as f:
+                eval_f1_cache = json.load(f)
+        except Exception:
+            pass
 
     analysis = {}
     for event in ["rain", "heat", "wind", "snow", "haze"]:
         rule = rule_analysis[event]
         confs, detected = [], []
+        ev_eval = eval_f1_cache.get(event, {})
+        sk_f1   = float(ev_eval.get("f1", 0.60) or 0.60)
+        attn_f1 = float(ev_eval.get("attn_f1", 0.0) or 0.0)
 
+        # Sklearn model weight scales with its TimeSeriesCV validation F1
         if event in ml_preds:
-            confs.append(("sklearn", 0.40, ml_preds[event]["confidence"]))
+            w_sk = max(0.35, sk_f1)
+            confs.append(("sklearn", w_sk, ml_preds[event]["confidence"]))
             detected.append(ml_preds[event]["detected"])
-        if event in lstm_preds:
-            confs.append(("lstm",    0.25, lstm_preds[event]["confidence"]))
-            detected.append(lstm_preds[event]["detected"])
-        if event in attn_preds:
-            confs.append(("attn",    0.25, attn_preds[event]["confidence"]))
+
+        # Deep attention model votes only if it achieved viable validation F1 (>= 0.30)
+        # Prevents uncalibrated models (e.g. heat F1=0.017) from corrupting predictions
+        if event in attn_preds and attn_f1 >= 0.30:
+            w_at = min(0.35, attn_f1 * 0.40)
+            confs.append(("attn", w_at, attn_preds[event]["confidence"]))
             detected.append(attn_preds[event]["detected"])
 
-        # Rule-based always contributes
-        confs.append(("rules", 0.10 if any_deep else 1.0,
-                      rule["confidence"]))
+        # LSTM sequence model contribution
+        if event in lstm_preds:
+            confs.append(("lstm", 0.15, lstm_preds[event]["confidence"]))
+            detected.append(lstm_preds[event]["detected"])
+
+        # Rule-based fallback always provides grounded physical anchor
+        rule_w = 0.15 if any_deep else 1.0
+        confs.append(("rules", rule_w, rule["confidence"]))
         detected.append(rule["detected"])
 
-        # Normalize weights and compute blended confidence
+        # Normalize weights and compute calibrated blended confidence
         total_w   = sum(w for _, w, _ in confs)
         blended   = sum(w/total_w * c for _, w, c in confs)
 
